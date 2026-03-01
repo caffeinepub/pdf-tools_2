@@ -1,20 +1,43 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToolUsage } from "@/hooks/useQueries";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
+  Camera,
+  Crop,
+  Crown,
+  EyeOff,
   FileImage,
+  FileMinus,
+  FileOutput,
   FileText,
+  GitCompare,
+  Globe,
   Hash,
   Image,
+  Languages,
   LayoutGrid,
   Lock,
   Merge,
   Minimize2,
+  PenLine,
+  PenSquare,
+  Presentation,
   RotateCw,
+  ScanText,
   Scissors,
+  Settings2,
+  Sheet,
+  Sparkles,
   Stamp,
+  TableProperties,
+  Trash2,
   Unlock,
+  Wand2,
+  Wrench,
+  Zap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
@@ -26,6 +49,7 @@ interface Tool {
   icon: LucideIcon;
   color: string;
   bgColor: string;
+  comingSoon?: boolean;
 }
 
 interface Category {
@@ -54,9 +78,25 @@ const CATEGORIES: Category[] = [
         bgColor: "#FFF0F0",
       },
       {
+        name: "Remove Pages",
+        path: "/remove-pages",
+        description: "Delete specific pages from a PDF",
+        icon: Trash2,
+        color: "#E25C3B",
+        bgColor: "#FFF0EC",
+      },
+      {
+        name: "Extract Pages",
+        path: "/extract-pages",
+        description: "Extract selected pages into a new PDF",
+        icon: FileMinus,
+        color: "#3B8CE2",
+        bgColor: "#EBF3FF",
+      },
+      {
         name: "Organize PDF",
         path: "/organize",
-        description: "Reorder and delete pages with drag & drop",
+        description: "Sort and reorder pages with drag & drop",
         icon: LayoutGrid,
         color: "#3BC4E2",
         bgColor: "#EBF9FD",
@@ -74,39 +114,94 @@ const CATEGORIES: Category[] = [
         color: "#E27A3B",
         bgColor: "#FFF5EC",
       },
-    ],
-  },
-  {
-    label: "Edit PDF",
-    tools: [
       {
-        name: "Rotate PDF",
-        path: "/rotate",
-        description: "Rotate pages 90, 180, or 270 degrees",
-        icon: RotateCw,
+        name: "Optimize PDF",
+        path: "/optimize",
+        description: "Improve PDF performance with AI tips",
+        icon: Zap,
+        color: "#E2A83B",
+        bgColor: "#FFFAEC",
+      },
+      {
+        name: "Repair PDF",
+        path: "/repair",
+        description: "Fix corrupted or damaged PDFs",
+        icon: Wrench,
+        color: "#E25C3B",
+        bgColor: "#FFF0EC",
+        comingSoon: true,
+      },
+      {
+        name: "OCR PDF",
+        path: "/ocr",
+        description: "Convert scanned PDFs into searchable text",
+        icon: ScanText,
         color: "#3B8CE2",
         bgColor: "#EBF3FF",
+        comingSoon: true,
       },
       {
-        name: "Watermark",
-        path: "/watermark",
-        description: "Add diagonal text watermark to all pages",
-        icon: Stamp,
-        color: "#9B3BE2",
-        bgColor: "#F5EBFF",
-      },
-      {
-        name: "Add Page Numbers",
-        path: "/page-numbers",
-        description: "Insert customizable page numbers",
-        icon: Hash,
-        color: "#E2823B",
-        bgColor: "#FFF8EC",
+        name: "Scan to PDF",
+        path: "/scan-to-pdf",
+        description: "Capture and convert scans to PDF",
+        icon: Camera,
+        color: "#2DBD6E",
+        bgColor: "#EBFFF4",
+        comingSoon: true,
       },
     ],
   },
   {
-    label: "Convert PDF",
+    label: "Convert to PDF",
+    tools: [
+      {
+        name: "JPG to PDF",
+        path: "/jpg-to-pdf",
+        description: "Turn images into a PDF document",
+        icon: Image,
+        color: "#3BE28A",
+        bgColor: "#EBFFF4",
+      },
+      {
+        name: "Word to PDF",
+        path: "/word-to-pdf",
+        description: "Convert DOC and DOCX files to PDF",
+        icon: FileText,
+        color: "#2B5CE2",
+        bgColor: "#EBF0FF",
+        comingSoon: true,
+      },
+      {
+        name: "PowerPoint to PDF",
+        path: "/pptx-to-pdf",
+        description: "Convert PPT and PPTX to PDF slides",
+        icon: Presentation,
+        color: "#D94F34",
+        bgColor: "#FFF0EC",
+        comingSoon: true,
+      },
+      {
+        name: "Excel to PDF",
+        path: "/excel-to-pdf",
+        description: "Convert XLS and XLSX spreadsheets to PDF",
+        icon: Sheet,
+        color: "#1D6F42",
+        bgColor: "#EBFFF4",
+        comingSoon: true,
+      },
+      {
+        name: "HTML to PDF",
+        path: "/html-to-pdf",
+        description: "Convert web pages and HTML files to PDF",
+        icon: Globe,
+        color: "#E27A3B",
+        bgColor: "#FFF5EC",
+        comingSoon: true,
+      },
+    ],
+  },
+  {
+    label: "Convert from PDF",
     tools: [
       {
         name: "PDF to JPG",
@@ -117,12 +212,85 @@ const CATEGORIES: Category[] = [
         bgColor: "#EBF2FF",
       },
       {
-        name: "JPG to PDF",
-        path: "/jpg-to-pdf",
-        description: "Turn images into a PDF document",
-        icon: Image,
-        color: "#3BE28A",
+        name: "PDF to Word",
+        path: "/pdf-to-word",
+        description: "Convert PDF to editable Word document",
+        icon: FileOutput,
+        color: "#2B5CE2",
+        bgColor: "#EBF0FF",
+        comingSoon: true,
+      },
+      {
+        name: "PDF to PowerPoint",
+        path: "/pdf-to-pptx",
+        description: "Convert PDF pages to editable slides",
+        icon: Presentation,
+        color: "#D94F34",
+        bgColor: "#FFF0EC",
+        comingSoon: true,
+      },
+      {
+        name: "PDF to Excel",
+        path: "/pdf-to-excel",
+        description: "Extract tables from PDF to spreadsheet",
+        icon: TableProperties,
+        color: "#1D6F42",
         bgColor: "#EBFFF4",
+        comingSoon: true,
+      },
+      {
+        name: "PDF to PDF/A",
+        path: "/pdf-to-pdfa",
+        description: "Convert to ISO archival format",
+        icon: FileText,
+        color: "#6B3BE2",
+        bgColor: "#F5EBFF",
+        comingSoon: true,
+      },
+    ],
+  },
+  {
+    label: "Edit PDF",
+    tools: [
+      {
+        name: "Edit PDF",
+        path: "/edit",
+        description: "Add text annotations and overlays",
+        icon: PenLine,
+        color: "#3B8CE2",
+        bgColor: "#EBF3FF",
+      },
+      {
+        name: "Rotate PDF",
+        path: "/rotate",
+        description: "Rotate pages 90, 180, or 270 degrees",
+        icon: RotateCw,
+        color: "#3B8CE2",
+        bgColor: "#EBF3FF",
+      },
+      {
+        name: "Add Page Numbers",
+        path: "/page-numbers",
+        description: "Insert customizable page numbers",
+        icon: Hash,
+        color: "#E2823B",
+        bgColor: "#FFF8EC",
+      },
+      {
+        name: "Watermark",
+        path: "/watermark",
+        description: "Add diagonal text watermark to all pages",
+        icon: Stamp,
+        color: "#9B3BE2",
+        bgColor: "#F5EBFF",
+      },
+      {
+        name: "Crop PDF",
+        path: "/crop",
+        description: "Trim edges with custom margins",
+        icon: Crop,
+        color: "#9B3BE2",
+        bgColor: "#F5EBFF",
       },
     ],
   },
@@ -144,6 +312,46 @@ const CATEGORIES: Category[] = [
         icon: Unlock,
         color: "#E2C43B",
         bgColor: "#FFFBEB",
+      },
+      {
+        name: "Sign PDF",
+        path: "/sign",
+        description: "Draw and stamp your signature",
+        icon: PenSquare,
+        color: "#2DBD6E",
+        bgColor: "#EBFFF4",
+      },
+      {
+        name: "Redact PDF",
+        path: "/redact",
+        description: "Permanently remove sensitive information",
+        icon: EyeOff,
+        color: "#E23B3B",
+        bgColor: "#FFF0F0",
+        comingSoon: true,
+      },
+      {
+        name: "Compare PDF",
+        path: "/compare",
+        description: "Compare two PDFs side-by-side",
+        icon: GitCompare,
+        color: "#3B7AE2",
+        bgColor: "#EBF2FF",
+        comingSoon: true,
+      },
+    ],
+  },
+  {
+    label: "PDF Intelligence",
+    tools: [
+      {
+        name: "Translate PDF",
+        path: "/translate",
+        description: "AI-powered translation preserving layout",
+        icon: Languages,
+        color: "#7C3BE2",
+        bgColor: "#F5EBFF",
+        comingSoon: true,
       },
     ],
   },
@@ -177,15 +385,33 @@ function ToolCard({ tool, usageCount }: { tool: Tool; usageCount?: number }) {
             <Icon className="w-5 h-5" style={{ color: tool.color }} />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <h3 className="font-display font-semibold text-sm text-foreground">
                 {tool.name}
               </h3>
-              {usageCount !== undefined && usageCount > 0 && (
-                <Badge variant="secondary" className="text-xs py-0 h-4 font-ui">
-                  {usageCount.toLocaleString()}
+              {tool.comingSoon && (
+                <Badge
+                  variant="secondary"
+                  className="text-xs py-0 h-4 font-ui"
+                  style={{
+                    backgroundColor: `${tool.color}12`,
+                    color: tool.color,
+                    border: `1px solid ${tool.color}25`,
+                  }}
+                >
+                  Premium
                 </Badge>
               )}
+              {!tool.comingSoon &&
+                usageCount !== undefined &&
+                usageCount > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="text-xs py-0 h-4 font-ui"
+                  >
+                    {usageCount.toLocaleString()}
+                  </Badge>
+                )}
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
               {tool.description}
@@ -212,6 +438,7 @@ export function Home() {
     "Split PDF": "split",
     "Organize PDF": "organize",
     "Compress PDF": "compress",
+    "Optimize PDF": "optimize",
     "Rotate PDF": "rotate",
     Watermark: "watermark",
     "Add Page Numbers": "page-numbers",
@@ -219,6 +446,11 @@ export function Home() {
     "JPG to PDF": "jpg-to-pdf",
     "Protect PDF": "protect",
     "Unlock PDF": "unlock",
+    "Remove Pages": "remove-pages",
+    "Extract Pages": "extract-pages",
+    "Edit PDF": "edit",
+    "Crop PDF": "crop",
+    "Sign PDF": "sign",
   };
 
   const containerVariants = {
@@ -229,6 +461,10 @@ export function Home() {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
   };
+
+  const totalFreeTools = CATEGORIES.flatMap((c) => c.tools).filter(
+    (t) => !t.comingSoon,
+  ).length;
 
   return (
     <main>
@@ -251,8 +487,8 @@ export function Home() {
               <span className="text-primary">to work with PDFs</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
-              Merge, split, compress, convert, and edit PDFs instantly in your
-              browser. Fast, secure, and completely free.
+              Merge, split, compress, convert, edit, and secure PDFs instantly
+              in your browser. Powered by Gemini AI for smart optimizations.
             </p>
           </motion.div>
 
@@ -264,8 +500,8 @@ export function Home() {
             className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground"
           >
             {[
-              ["11", "PDF Tools"],
-              ["100%", "Free"],
+              ["30+", "PDF Tools"],
+              [String(totalFreeTools), "Free Tools"],
               ["0", "Files Uploaded to Server"],
             ].map(([num, label]) => (
               <div key={label} className="text-center">
@@ -304,6 +540,139 @@ export function Home() {
               </div>
             </motion.div>
           ))}
+        </motion.div>
+      </section>
+
+      {/* iLoveIMG Promo Section */}
+      <section className="border-t border-border bg-card/30">
+        <div className="container max-w-5xl py-14">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <Card className="border-border shadow-card overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-primary via-orange-400 to-amber-400" />
+              <CardContent className="pt-8 pb-8">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-primary/10">
+                    <Wand2 className="w-7 h-7 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h2 className="font-display font-bold text-xl text-foreground">
+                        iLoveIMG
+                      </h2>
+                      <Badge
+                        variant="secondary"
+                        className="font-ui text-xs"
+                        style={{
+                          backgroundColor: "#E25C3B12",
+                          color: "#E25C3B",
+                          border: "1px solid #E25C3B25",
+                        }}
+                      >
+                        Sister Service
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Need to work with images too? iLoveIMG offers the same
+                      easy PDF experience for images — compress, resize, crop,
+                      convert, and enhance with AI.
+                    </p>
+                  </div>
+                  <Link to="/ilovepdf" className="flex-shrink-0">
+                    <Button
+                      variant="outline"
+                      className="font-ui gap-2 border-primary/30 hover:border-primary/60 hover:bg-primary/5"
+                    >
+                      <Image className="w-4 h-4" />
+                      Explore iLoveIMG
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Workflows & Platforms */}
+      <section className="container max-w-5xl pb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="font-display font-bold text-lg text-foreground mb-6 flex items-center gap-2">
+            <span className="w-1 h-5 rounded-full bg-primary inline-block" />
+            Workflows &amp; Platforms
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                icon: Settings2,
+                name: "Workflows",
+                desc: "Automate and reuse tool combinations",
+                path: "/workflows",
+                color: "#3B8CE2",
+              },
+              {
+                icon: Crown,
+                name: "Premium Plan",
+                desc: "Advanced features, larger files, no ads",
+                path: "/premium",
+                color: "#E27A3B",
+              },
+              {
+                icon: Sparkles,
+                name: "AI Tools",
+                desc: "Gemini AI for translation, OCR, and optimization",
+                path: "/translate",
+                color: "#7C3BE2",
+              },
+              {
+                icon: FileText,
+                name: "Business",
+                desc: "Team management and bulk automation",
+                path: "/premium",
+                color: "#2DBD6E",
+              },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link key={item.name} to={item.path}>
+                  <motion.div
+                    whileHover={{ y: -3 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <Card className="border-border shadow-card hover:shadow-card-hover transition-all duration-200 h-full">
+                      <CardContent className="pt-5">
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                          style={{ backgroundColor: `${item.color}15` }}
+                        >
+                          <Icon
+                            className="w-5 h-5"
+                            style={{ color: item.color }}
+                          />
+                        </div>
+                        <h3 className="font-display font-semibold text-sm text-foreground mb-1">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {item.desc}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                </Link>
+              );
+            })}
+          </div>
         </motion.div>
       </section>
     </main>

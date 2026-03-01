@@ -12,18 +12,18 @@ import {
   formatBytes,
   readFileAsArrayBuffer,
 } from "@/utils/pdfUtils";
-import { Loader2, Minimize2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Zap } from "lucide-react";
 import { PDFDocument } from "pdf-lib";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-export function CompressPDF() {
+export function OptimizePDF() {
   const [files, setFiles] = useState<File[]>([]);
   const [state, setState] = useState<ProcessState>("idle");
   const [resultBytes, setResultBytes] = useState<Uint8Array | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
   const [sizeBefore, setSizeBefore] = useState(0);
   const [sizeAfter, setSizeAfter] = useState(0);
-  const [errorMsg, setErrorMsg] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState<string>("");
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -34,10 +34,11 @@ export function CompressPDF() {
     async (filename: string, origSize: number, newSize: number) => {
       setAiLoading(true);
       try {
-        const prompt = `The user just compressed a PDF named "${filename}" from ${Math.round(origSize / 1024)}KB to ${Math.round(newSize / 1024)}KB. Give them exactly 3 brief, practical tips for optimizing PDF file size further. Format as a numbered list. Keep each tip to 1-2 sentences.`;
+        const prompt = `The user just optimized a PDF named "${filename}" from ${Math.round(origSize / 1024)}KB to ${Math.round(newSize / 1024)}KB. Give them exactly 3 brief, practical tips for reducing PDF file size further. Format as a numbered list. Keep each tip to 1-2 sentences. Focus on actionable advice.`;
         const result = await callGemini(prompt);
         setAiSuggestions(result);
       } catch (e) {
+        // Silently fail for AI suggestions
         console.error("Gemini error:", e);
       } finally {
         setAiLoading(false);
@@ -57,30 +58,30 @@ export function CompressPDF() {
       const buf = await readFileAsArrayBuffer(file);
       const doc = await PDFDocument.load(buf, { ignoreEncryption: true });
 
-      // Remove metadata to reduce size
+      // Optimize: remove metadata, use object streams
       doc.setTitle("");
       doc.setAuthor("");
       doc.setSubject("");
       doc.setKeywords([]);
-      doc.setProducer("");
-      doc.setCreator("");
+      doc.setProducer("PDFTools Optimizer");
+      doc.setCreator("PDFTools");
 
       const bytes = await doc.save({ useObjectStreams: true });
       setSizeAfter(bytes.length);
       setResultBytes(bytes);
       setState("done");
-      incrementUsage("compress");
+      incrementUsage("optimize");
       addHistory({
-        toolName: "compress",
+        toolName: "optimize",
         originalFile: file.name,
-        resultFile: "compressed.pdf",
+        resultFile: "optimized.pdf",
       });
-      toast.success("PDF compressed successfully!");
+      toast.success("PDF optimized successfully!");
 
       // Fetch AI suggestions after processing
       void fetchAiSuggestions(file.name, file.size, bytes.length);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to compress PDF";
+      const msg = e instanceof Error ? e.message : "Failed to optimize PDF";
       setErrorMsg(msg);
       setState("error");
       toast.error(msg);
@@ -88,7 +89,7 @@ export function CompressPDF() {
   }, [files, incrementUsage, addHistory, fetchAiSuggestions]);
 
   const handleDownload = useCallback(() => {
-    if (resultBytes) downloadBlob(resultBytes, "compressed.pdf");
+    if (resultBytes) downloadBlob(resultBytes, "optimized.pdf");
   }, [resultBytes]);
 
   const savedPercent =
@@ -98,10 +99,10 @@ export function CompressPDF() {
 
   return (
     <ToolLayout
-      toolName="Compress PDF"
-      toolPath="/compress"
-      description="Reduce PDF file size by removing metadata and optimizing structure."
-      icon={Minimize2}
+      toolName="Optimize PDF"
+      toolPath="/optimize"
+      description="Improve PDF performance by removing metadata and optimizing structure. Get AI-powered tips."
+      icon={Zap}
       iconColor="#E27A3B"
     >
       <div className="space-y-6">
@@ -113,7 +114,7 @@ export function CompressPDF() {
               files={files}
               onFilesChange={setFiles}
               label="Drop your PDF here"
-              description="Select the PDF you want to compress"
+              description="Select the PDF you want to optimize"
             />
           </CardContent>
         </Card>
@@ -139,7 +140,7 @@ export function CompressPDF() {
                   </div>
                   <div className="text-center">
                     <p className="text-xs text-muted-foreground mb-1">
-                      Compressed
+                      Optimized
                     </p>
                     <p className="font-display font-bold text-lg">
                       {formatBytes(sizeAfter)}
@@ -152,8 +153,8 @@ export function CompressPDF() {
                 state={state}
                 onProcess={handleProcess}
                 onDownload={handleDownload}
-                processLabel="Compress PDF"
-                downloadLabel="Download Compressed PDF"
+                processLabel="Optimize PDF"
+                downloadLabel="Download Optimized PDF"
                 errorMessage={errorMsg}
               />
             </CardContent>

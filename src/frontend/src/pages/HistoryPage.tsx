@@ -1,28 +1,47 @@
 import type { HistoryEntry } from "@/backend.d";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHistory } from "@/hooks/useQueries";
 import { Link } from "@tanstack/react-router";
 import {
   Archive,
+  Camera,
   ChevronRight,
   Clock,
+  Crop,
+  EyeOff,
   FileImage,
+  FileMinus,
   FileText,
+  GitCompare,
   GitMerge,
+  Globe,
   Hash,
   Home,
   Image,
+  Languages,
   LayoutGrid,
   Lock,
+  PenLine,
+  PenSquare,
   RotateCcw,
+  ScanText,
   Scissors,
+  Sheet,
   Stamp,
+  TableProperties,
+  Trash,
+  Trash2,
   Unlock,
+  Wrench,
+  Zap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
+import { useCallback, useEffect, useState } from "react";
 
 // Tool metadata map
 interface ToolMeta {
@@ -31,6 +50,7 @@ interface ToolMeta {
   color: string;
   bgColor: string;
   path: string;
+  category: "organize" | "optimize" | "convert" | "edit" | "security";
 }
 
 const TOOL_MAP: Record<string, ToolMeta> = {
@@ -40,6 +60,7 @@ const TOOL_MAP: Record<string, ToolMeta> = {
     color: "#E25C3B",
     bgColor: "#FFF0EC",
     path: "/merge",
+    category: "organize",
   },
   split: {
     label: "Split PDF",
@@ -47,83 +68,23 @@ const TOOL_MAP: Record<string, ToolMeta> = {
     color: "#F4A261",
     bgColor: "#FFF8EC",
     path: "/split",
+    category: "organize",
   },
-  compress: {
-    label: "Compress PDF",
-    icon: Archive,
-    color: "#2EC4B6",
-    bgColor: "#EBFBFA",
-    path: "/compress",
+  "remove-pages": {
+    label: "Remove Pages",
+    icon: Trash2,
+    color: "#E25C3B",
+    bgColor: "#FFF0EC",
+    path: "/remove-pages",
+    category: "organize",
   },
-  rotate: {
-    label: "Rotate PDF",
-    icon: RotateCcw,
-    color: "#8338EC",
-    bgColor: "#F5EBFF",
-    path: "/rotate",
-  },
-  watermark: {
-    label: "Watermark PDF",
-    icon: Stamp,
-    color: "#FF6B6B",
-    bgColor: "#FFF0F0",
-    path: "/watermark",
-  },
-  protect: {
-    label: "Protect PDF",
-    icon: Lock,
-    color: "#06D6A0",
-    bgColor: "#EBFFF8",
-    path: "/protect",
-  },
-  unlock: {
-    label: "Unlock PDF",
-    icon: Unlock,
-    color: "#FFB703",
-    bgColor: "#FFFAEB",
-    path: "/unlock",
-  },
-  "pdf-to-jpg": {
-    label: "PDF to JPG",
-    icon: FileImage,
-    color: "#4CC9F0",
-    bgColor: "#EBF9FF",
-    path: "/pdf-to-jpg",
-  },
-  pdfToJpg: {
-    label: "PDF to JPG",
-    icon: FileImage,
-    color: "#4CC9F0",
-    bgColor: "#EBF9FF",
-    path: "/pdf-to-jpg",
-  },
-  "jpg-to-pdf": {
-    label: "JPG to PDF",
-    icon: Image,
-    color: "#F72585",
-    bgColor: "#FFF0F8",
-    path: "/jpg-to-pdf",
-  },
-  jpgToPdf: {
-    label: "JPG to PDF",
-    icon: Image,
-    color: "#F72585",
-    bgColor: "#FFF0F8",
-    path: "/jpg-to-pdf",
-  },
-  "page-numbers": {
-    label: "Page Numbers",
-    icon: Hash,
-    color: "#3A86FF",
+  "extract-pages": {
+    label: "Extract Pages",
+    icon: FileMinus,
+    color: "#3B8CE2",
     bgColor: "#EBF3FF",
-    path: "/page-numbers",
-  },
-  pageNumbers: {
-    label: "Page Numbers",
-    icon: Hash,
-    color: "#3A86FF",
-    bgColor: "#EBF3FF",
-    path: "/page-numbers",
+    path: "/extract-pages",
+    category: "organize",
   },
   organize: {
     label: "Organize PDF",
@@ -131,8 +92,251 @@ const TOOL_MAP: Record<string, ToolMeta> = {
     color: "#3BC4E2",
     bgColor: "#EBF9FD",
     path: "/organize",
+    category: "organize",
+  },
+  compress: {
+    label: "Compress PDF",
+    icon: Archive,
+    color: "#2EC4B6",
+    bgColor: "#EBFBFA",
+    path: "/compress",
+    category: "optimize",
+  },
+  optimize: {
+    label: "Optimize PDF",
+    icon: Zap,
+    color: "#E2A83B",
+    bgColor: "#FFFAEC",
+    path: "/optimize",
+    category: "optimize",
+  },
+  repair: {
+    label: "Repair PDF",
+    icon: Wrench,
+    color: "#E25C3B",
+    bgColor: "#FFF0EC",
+    path: "/repair",
+    category: "optimize",
+  },
+  ocr: {
+    label: "OCR PDF",
+    icon: ScanText,
+    color: "#3B8CE2",
+    bgColor: "#EBF3FF",
+    path: "/ocr",
+    category: "optimize",
+  },
+  "scan-to-pdf": {
+    label: "Scan to PDF",
+    icon: Camera,
+    color: "#2DBD6E",
+    bgColor: "#EBFFF4",
+    path: "/scan-to-pdf",
+    category: "optimize",
+  },
+  "jpg-to-pdf": {
+    label: "JPG to PDF",
+    icon: Image,
+    color: "#F72585",
+    bgColor: "#FFF0F8",
+    path: "/jpg-to-pdf",
+    category: "convert",
+  },
+  jpgToPdf: {
+    label: "JPG to PDF",
+    icon: Image,
+    color: "#F72585",
+    bgColor: "#FFF0F8",
+    path: "/jpg-to-pdf",
+    category: "convert",
+  },
+  "word-to-pdf": {
+    label: "Word to PDF",
+    icon: FileText,
+    color: "#2B5CE2",
+    bgColor: "#EBF0FF",
+    path: "/word-to-pdf",
+    category: "convert",
+  },
+  "pptx-to-pdf": {
+    label: "PowerPoint to PDF",
+    icon: FileText,
+    color: "#D94F34",
+    bgColor: "#FFF0EC",
+    path: "/pptx-to-pdf",
+    category: "convert",
+  },
+  "excel-to-pdf": {
+    label: "Excel to PDF",
+    icon: Sheet,
+    color: "#1D6F42",
+    bgColor: "#EBFFF4",
+    path: "/excel-to-pdf",
+    category: "convert",
+  },
+  "html-to-pdf": {
+    label: "HTML to PDF",
+    icon: Globe,
+    color: "#E27A3B",
+    bgColor: "#FFF5EC",
+    path: "/html-to-pdf",
+    category: "convert",
+  },
+  "pdf-to-jpg": {
+    label: "PDF to JPG",
+    icon: FileImage,
+    color: "#4CC9F0",
+    bgColor: "#EBF9FF",
+    path: "/pdf-to-jpg",
+    category: "convert",
+  },
+  pdfToJpg: {
+    label: "PDF to JPG",
+    icon: FileImage,
+    color: "#4CC9F0",
+    bgColor: "#EBF9FF",
+    path: "/pdf-to-jpg",
+    category: "convert",
+  },
+  "pdf-to-word": {
+    label: "PDF to Word",
+    icon: FileText,
+    color: "#2B5CE2",
+    bgColor: "#EBF0FF",
+    path: "/pdf-to-word",
+    category: "convert",
+  },
+  "pdf-to-pptx": {
+    label: "PDF to PowerPoint",
+    icon: FileText,
+    color: "#D94F34",
+    bgColor: "#FFF0EC",
+    path: "/pdf-to-pptx",
+    category: "convert",
+  },
+  "pdf-to-excel": {
+    label: "PDF to Excel",
+    icon: TableProperties,
+    color: "#1D6F42",
+    bgColor: "#EBFFF4",
+    path: "/pdf-to-excel",
+    category: "convert",
+  },
+  "pdf-to-pdfa": {
+    label: "PDF to PDF/A",
+    icon: Archive,
+    color: "#6B3BE2",
+    bgColor: "#F5EBFF",
+    path: "/pdf-to-pdfa",
+    category: "convert",
+  },
+  rotate: {
+    label: "Rotate PDF",
+    icon: RotateCcw,
+    color: "#8338EC",
+    bgColor: "#F5EBFF",
+    path: "/rotate",
+    category: "edit",
+  },
+  watermark: {
+    label: "Watermark PDF",
+    icon: Stamp,
+    color: "#FF6B6B",
+    bgColor: "#FFF0F0",
+    path: "/watermark",
+    category: "edit",
+  },
+  "page-numbers": {
+    label: "Page Numbers",
+    icon: Hash,
+    color: "#3A86FF",
+    bgColor: "#EBF3FF",
+    path: "/page-numbers",
+    category: "edit",
+  },
+  pageNumbers: {
+    label: "Page Numbers",
+    icon: Hash,
+    color: "#3A86FF",
+    bgColor: "#EBF3FF",
+    path: "/page-numbers",
+    category: "edit",
+  },
+  edit: {
+    label: "Edit PDF",
+    icon: PenLine,
+    color: "#3B8CE2",
+    bgColor: "#EBF3FF",
+    path: "/edit",
+    category: "edit",
+  },
+  crop: {
+    label: "Crop PDF",
+    icon: Crop,
+    color: "#9B3BE2",
+    bgColor: "#F5EBFF",
+    path: "/crop",
+    category: "edit",
+  },
+  sign: {
+    label: "Sign PDF",
+    icon: PenSquare,
+    color: "#2DBD6E",
+    bgColor: "#EBFFF4",
+    path: "/sign",
+    category: "security",
+  },
+  protect: {
+    label: "Protect PDF",
+    icon: Lock,
+    color: "#06D6A0",
+    bgColor: "#EBFFF8",
+    path: "/protect",
+    category: "security",
+  },
+  unlock: {
+    label: "Unlock PDF",
+    icon: Unlock,
+    color: "#FFB703",
+    bgColor: "#FFFAEB",
+    path: "/unlock",
+    category: "security",
+  },
+  redact: {
+    label: "Redact PDF",
+    icon: EyeOff,
+    color: "#E23B3B",
+    bgColor: "#FFF0F0",
+    path: "/redact",
+    category: "security",
+  },
+  compare: {
+    label: "Compare PDF",
+    icon: GitCompare,
+    color: "#3B7AE2",
+    bgColor: "#EBF2FF",
+    path: "/compare",
+    category: "security",
+  },
+  translate: {
+    label: "Translate PDF",
+    icon: Languages,
+    color: "#7C3BE2",
+    bgColor: "#F5EBFF",
+    path: "/translate",
+    category: "optimize",
   },
 };
+
+type FilterCategory =
+  | "all"
+  | "organize"
+  | "optimize"
+  | "convert"
+  | "edit"
+  | "security";
+
+const CLEARED_STORAGE_KEY = "pdf-tools-history-cleared-at";
 
 function getToolMeta(toolName: string): ToolMeta {
   return (
@@ -142,6 +346,7 @@ function getToolMeta(toolName: string): ToolMeta {
       color: "#6B7280",
       bgColor: "#F3F4F6",
       path: "/",
+      category: "organize" as const,
     }
   );
 }
@@ -311,12 +516,43 @@ function EmptyState() {
 
 export function HistoryPage() {
   const { data: entries, isLoading } = useHistory();
+  const [filter, setFilter] = useState<FilterCategory>("all");
+  const [clearedAt, setClearedAt] = useState<number>(() => {
+    const stored = localStorage.getItem(CLEARED_STORAGE_KEY);
+    return stored ? Number(stored) : 0;
+  });
 
-  const sorted = entries
-    ? [...entries].sort((a, b) =>
-        b.timestamp > a.timestamp ? 1 : b.timestamp < a.timestamp ? -1 : 0,
-      )
+  const handleClearHistory = useCallback(() => {
+    const now = Date.now();
+    localStorage.setItem(CLEARED_STORAGE_KEY, String(now));
+    setClearedAt(now);
+  }, []);
+
+  // Filter entries by cleared time and category
+  const filtered = entries
+    ? entries
+        .filter((entry) => {
+          // Filter out entries before clear
+          const ms = Number(entry.timestamp / 1_000_000n);
+          if (ms < clearedAt) return false;
+          // Filter by category
+          if (filter === "all") return true;
+          const meta = getToolMeta(entry.toolName);
+          return meta.category === filter;
+        })
+        .sort((a, b) =>
+          b.timestamp > a.timestamp ? 1 : b.timestamp < a.timestamp ? -1 : 0,
+        )
     : [];
+
+  const FILTER_TABS: { value: FilterCategory; label: string }[] = [
+    { value: "all", label: "All" },
+    { value: "organize", label: "Organize" },
+    { value: "optimize", label: "Optimize" },
+    { value: "convert", label: "Convert" },
+    { value: "edit", label: "Edit" },
+    { value: "security", label: "Security" },
+  ];
 
   return (
     <main className="min-h-screen bg-background">
@@ -346,7 +582,7 @@ export function HistoryPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="flex items-start gap-4 mb-10"
+          className="flex items-start gap-4 mb-8"
         >
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
@@ -354,7 +590,7 @@ export function HistoryPage() {
           >
             <Clock className="w-7 h-7 text-primary" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="font-display text-3xl font-bold text-foreground mb-1">
               Processing History
             </h1>
@@ -364,6 +600,38 @@ export function HistoryPage() {
           </div>
         </motion.div>
 
+        {/* Filter tabs + controls */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <Tabs
+            value={filter}
+            onValueChange={(v) => setFilter(v as FilterCategory)}
+          >
+            <TabsList className="h-9">
+              {FILTER_TABS.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="text-xs font-ui px-3"
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+
+          {filtered.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearHistory}
+              className="text-muted-foreground hover:text-destructive font-ui text-xs gap-1.5"
+            >
+              <Trash className="w-3.5 h-3.5" />
+              Clear history
+            </Button>
+          )}
+        </div>
+
         {/* Content */}
         {isLoading ? (
           <div className="space-y-3">
@@ -371,18 +639,18 @@ export function HistoryPage() {
               <SkeletonCard key={id} />
             ))}
           </div>
-        ) : sorted.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <EmptyState />
         ) : (
           <>
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-muted-foreground font-ui">
-                {sorted.length} operation{sorted.length === 1 ? "" : "s"}{" "}
-                recorded
+                {filtered.length} operation{filtered.length === 1 ? "" : "s"}{" "}
+                {filter !== "all" ? `in ${filter}` : "recorded"}
               </p>
             </div>
             <div className="space-y-3">
-              {sorted.map((entry, i) => (
+              {filtered.map((entry, i) => (
                 <HistoryCard
                   key={`${entry.timestamp}-${i}`}
                   entry={entry}
