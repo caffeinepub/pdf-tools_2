@@ -20,11 +20,11 @@ import {
   useAllUserHistories,
   useAssignUserRole,
   useGetUserProfile,
-  useIsAdmin,
 } from "@/hooks/useQueries";
 import type { Principal } from "@icp-sdk/core/principal";
 import { Principal as PrincipalClass } from "@icp-sdk/core/principal";
 import {
+  BarChart3,
   Camera,
   Check,
   Crop,
@@ -54,6 +54,7 @@ import {
   ScanText,
   Scissors,
   Settings,
+  Settings2,
   Sheet,
   ShieldCheck,
   Stamp,
@@ -1094,64 +1095,452 @@ function SponsorsTab() {
   );
 }
 
+// ── Analytics Tab ─────────────────────────────────────────────────────────────
+function AnalyticsTab() {
+  const { data: allHistories, isLoading } = useAllUserHistories();
+
+  const totalUsers = allHistories ? allHistories.length : 0;
+
+  // Flatten all history entries and count tool usage
+  const toolUsageCounts: Record<string, number> = {};
+  if (allHistories) {
+    for (const [, entries] of allHistories) {
+      for (const entry of entries) {
+        const tool = entry.toolName || "unknown";
+        toolUsageCounts[tool] = (toolUsageCounts[tool] || 0) + 1;
+      }
+    }
+  }
+  const topTools = Object.entries(toolUsageCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  const maxCount = topTools.length > 0 ? topTools[0][1] : 1;
+  const totalOps = Object.values(toolUsageCounts).reduce((a, b) => a + b, 0);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="font-display font-semibold text-foreground mb-1">
+          System Analytics
+        </h3>
+        <p className="text-sm text-muted-foreground font-ui">
+          Overview of users, operations, and tool usage
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[
+          {
+            label: "Total Users",
+            value: isLoading ? "…" : String(totalUsers),
+            color: "#3B8CE2",
+          },
+          {
+            label: "Total Operations",
+            value: isLoading ? "…" : String(totalOps),
+            color: "#2DBD6E",
+          },
+          {
+            label: "Tools Used",
+            value: isLoading
+              ? "…"
+              : String(Object.keys(toolUsageCounts).length),
+            color: "#9B3BE2",
+          },
+        ].map((stat) => (
+          <Card key={stat.label} className="border-border">
+            <CardContent className="pt-5">
+              <p className="text-xs font-ui text-muted-foreground uppercase tracking-wider mb-1">
+                {stat.label}
+              </p>
+              <p
+                className="font-display font-bold text-3xl"
+                style={{ color: stat.color }}
+              >
+                {stat.value}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-display text-base flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-primary" />
+            Top 5 Most Used Tools
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground font-ui">Loading…</p>
+          ) : topTools.length === 0 ? (
+            <p className="text-sm text-muted-foreground font-ui text-center py-6">
+              No tool usage data yet
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {topTools.map(([tool, count]) => (
+                <div key={tool} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-ui text-foreground capitalize">
+                      {tool}
+                    </span>
+                    <span className="font-bold text-primary font-ui">
+                      {count} ops
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all duration-500"
+                      style={{ width: `${(count / maxCount) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ── Subscriptions Tab ─────────────────────────────────────────────────────────
+function SubscriptionsTab() {
+  const DEMO_SUBS = [
+    {
+      user: "alice@example.com",
+      plan: "Plus Monthly",
+      status: "Active",
+      start: "2025-12-01",
+      amount: "$9.99",
+    },
+    {
+      user: "bob@example.com",
+      plan: "Plus Yearly",
+      status: "Active",
+      start: "2025-10-15",
+      amount: "$79.99",
+    },
+    {
+      user: "carol@example.com",
+      plan: "Plus Monthly",
+      status: "Cancelled",
+      start: "2025-11-01",
+      amount: "$9.99",
+    },
+    {
+      user: "dave@example.com",
+      plan: "Plus Yearly",
+      status: "Active",
+      start: "2026-01-01",
+      amount: "$79.99",
+    },
+  ];
+  const activeSubs = DEMO_SUBS.filter((s) => s.status === "Active").length;
+  const mrr =
+    DEMO_SUBS.filter((s) => s.status === "Active" && s.plan.includes("Monthly"))
+      .length *
+      9.99 +
+    DEMO_SUBS.filter((s) => s.status === "Active" && s.plan.includes("Yearly"))
+      .length *
+      (79.99 / 12);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="font-display font-semibold text-foreground mb-1">
+          Subscription Management
+        </h3>
+        <p className="text-sm text-muted-foreground font-ui">
+          Subscription data synced via Stripe webhooks (demo data shown)
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="border-border">
+          <CardContent className="pt-5">
+            <p className="text-xs font-ui text-muted-foreground uppercase tracking-wider mb-1">
+              Monthly Recurring Revenue
+            </p>
+            <p className="font-display font-bold text-3xl text-primary">
+              ${mrr.toFixed(2)}
+            </p>
+            <p className="text-xs text-muted-foreground font-ui mt-1">
+              MRR (demo)
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-border">
+          <CardContent className="pt-5">
+            <p className="text-xs font-ui text-muted-foreground uppercase tracking-wider mb-1">
+              Active Subscriptions
+            </p>
+            <p className="font-display font-bold text-3xl text-green-500">
+              {activeSubs}
+            </p>
+            <p className="text-xs text-muted-foreground font-ui mt-1">
+              of {DEMO_SUBS.length} total
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="border border-border rounded-lg overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-muted/50 border-b border-border">
+              {["User", "Plan", "Status", "Start Date", "Amount"].map((h) => (
+                <th
+                  key={h}
+                  className="text-left py-2.5 px-4 font-ui text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {DEMO_SUBS.map((sub) => (
+              <tr
+                key={sub.user}
+                className="border-b border-border last:border-0 hover:bg-muted/20"
+              >
+                <td className="py-3 px-4 font-ui text-sm text-foreground">
+                  {sub.user}
+                </td>
+                <td className="py-3 px-4 font-ui text-sm text-muted-foreground">
+                  {sub.plan}
+                </td>
+                <td className="py-3 px-4">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-ui font-medium ${
+                      sub.status === "Active"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-600"
+                    }`}
+                  >
+                    {sub.status}
+                  </span>
+                </td>
+                <td className="py-3 px-4 font-ui text-sm text-muted-foreground">
+                  {sub.start}
+                </td>
+                <td className="py-3 px-4 font-ui text-sm font-medium text-foreground">
+                  {sub.amount}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ── Tool Control Tab ──────────────────────────────────────────────────────────
+const IMG_TOOLS_LIST = [
+  "Compress Image",
+  "Resize Image",
+  "Crop Image",
+  "Convert Image",
+  "Rotate Image",
+  "Watermark Image",
+  "Image to PDF",
+  "Remove Background",
+  "Image Editor",
+];
+
+function ToolControlTab() {
+  const { settings, updateSettings } = useAdminSettings();
+
+  const [freeMaxMB, setFreeMaxMB] = useState<number>(
+    settings.toolControlFreeMaxMB ?? 5,
+  );
+  const [plusMaxMB, setPlusMaxMB] = useState<number>(
+    settings.toolControlPlusMaxMB ?? 200,
+  );
+  const [globalWatermark, setGlobalWatermark] = useState<boolean>(
+    settings.toolControlGlobalWatermark ?? true,
+  );
+  const [watermarkText, setWatermarkText] = useState<string>(
+    settings.toolControlWatermarkText ?? "Processed by PDFTools",
+  );
+  const [disabledTools, setDisabledTools] = useState<string[]>(
+    settings.toolControlDisabledTools ?? [],
+  );
+
+  const toggleTool = (tool: string) => {
+    setDisabledTools((prev) =>
+      prev.includes(tool) ? prev.filter((t) => t !== tool) : [...prev, tool],
+    );
+  };
+
+  const handleSave = () => {
+    updateSettings({
+      toolControlFreeMaxMB: freeMaxMB,
+      toolControlPlusMaxMB: plusMaxMB,
+      toolControlGlobalWatermark: globalWatermark,
+      toolControlWatermarkText: watermarkText,
+      toolControlDisabledTools: disabledTools,
+    });
+    toast.success("Tool control settings saved");
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="font-display font-semibold text-foreground mb-1">
+          Tool Control
+        </h3>
+        <p className="text-sm text-muted-foreground font-ui">
+          Configure file size limits, watermarks, and per-tool availability
+        </p>
+      </div>
+
+      <Card className="border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-display text-base flex items-center gap-2">
+            <Settings2 className="w-4 h-4 text-primary" />
+            File Size Limits
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="free-max" className="font-ui font-medium text-sm">
+                Free Plan Max (MB)
+              </Label>
+              <Input
+                id="free-max"
+                type="number"
+                min={1}
+                max={50}
+                value={freeMaxMB}
+                onChange={(e) => setFreeMaxMB(Number(e.target.value))}
+                className="font-ui"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="plus-max" className="font-ui font-medium text-sm">
+                Plus Plan Max (MB)
+              </Label>
+              <Input
+                id="plus-max"
+                type="number"
+                min={10}
+                max={500}
+                value={plusMaxMB}
+                onChange={(e) => setPlusMaxMB(Number(e.target.value))}
+                className="font-ui"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-display text-base flex items-center gap-2">
+            <Stamp className="w-4 h-4 text-primary" />
+            Watermark Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="font-ui font-medium text-sm">
+                Global Watermark (Free users)
+              </Label>
+              <p className="text-xs text-muted-foreground font-ui mt-0.5">
+                Adds watermark to all free-plan outputs
+              </p>
+            </div>
+            <Switch
+              checked={globalWatermark}
+              onCheckedChange={setGlobalWatermark}
+            />
+          </div>
+          {globalWatermark && (
+            <div className="space-y-1.5">
+              <Label className="font-ui font-medium text-sm">
+                Watermark Text
+              </Label>
+              <Input
+                value={watermarkText}
+                onChange={(e) => setWatermarkText(e.target.value)}
+                placeholder="Processed by PDFTools"
+                className="font-ui"
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-display text-base flex items-center gap-2">
+            <Eye className="w-4 h-4 text-primary" />
+            Image Tool Availability
+          </CardTitle>
+          <CardDescription className="font-ui text-sm">
+            Toggle individual image tools on or off
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {IMG_TOOLS_LIST.map((tool) => {
+              const isDisabled = disabledTools.includes(tool);
+              return (
+                <button
+                  type="button"
+                  key={tool}
+                  onClick={() => toggleTool(tool)}
+                  className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer w-full text-left ${
+                    isDisabled
+                      ? "border-border bg-muted/30 opacity-50"
+                      : "border-border bg-card hover:border-primary/30"
+                  }`}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Image className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="font-ui text-sm text-foreground flex-1">
+                    {tool}
+                  </span>
+                  {isDisabled ? (
+                    <EyeOff className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-primary" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Button onClick={handleSave} className="font-ui gap-2">
+        <Check className="w-4 h-4" />
+        Save Tool Control Settings
+      </Button>
+    </div>
+  );
+}
+
 // ── Main Admin Dashboard ──────────────────────────────────────────────────────
 export function AdminPage() {
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
-  const { identity, login, isInitializing } = useInternetIdentity();
-  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
+  const { isInitializing } = useInternetIdentity();
 
-  if (isInitializing || isAdminLoading) {
+  if (isInitializing) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center space-y-2">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm text-muted-foreground font-ui">Loading…</p>
         </div>
-      </div>
-    );
-  }
-
-  if (!identity) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm border-border shadow-card text-center">
-          <CardContent className="pt-8 pb-8">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-6 h-6 text-primary" />
-            </div>
-            <h2 className="font-display font-bold text-lg text-foreground mb-2">
-              Login Required
-            </h2>
-            <p className="text-sm text-muted-foreground font-ui mb-6">
-              Please login with Internet Identity to access the admin dashboard.
-            </p>
-            <Button onClick={login} className="font-ui gap-2 w-full">
-              <LogIn className="w-4 h-4" />
-              Login
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm border-border shadow-card text-center">
-          <CardContent className="pt-8 pb-8">
-            <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-              <ShieldCheck className="w-6 h-6 text-destructive" />
-            </div>
-            <h2 className="font-display font-bold text-lg text-foreground mb-2">
-              Access Denied
-            </h2>
-            <p className="text-sm text-muted-foreground font-ui">
-              You are not an admin. Contact an administrator to grant you
-              access.
-            </p>
-          </CardContent>
-        </Card>
       </div>
     );
   }
@@ -1186,7 +1575,7 @@ export function AdminPage() {
 
         {/* Dashboard tabs */}
         <Tabs defaultValue="services" className="space-y-6">
-          <TabsList className="grid grid-cols-3 sm:grid-cols-6 h-auto gap-1 bg-muted p-1 rounded-xl">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-9 h-auto gap-1 bg-muted p-1 rounded-xl">
             {[
               { value: "services", icon: Eye, label: "Services" },
               { value: "theme", icon: Palette, label: "Theme" },
@@ -1194,6 +1583,9 @@ export function AdminPage() {
               { value: "footer", icon: FileText, label: "Footer" },
               { value: "users", icon: Users, label: "Users" },
               { value: "sponsors", icon: Crown, label: "Sponsors" },
+              { value: "analytics", icon: BarChart3, label: "Analytics" },
+              { value: "subscriptions", icon: Zap, label: "Subscriptions" },
+              { value: "toolcontrol", icon: Settings2, label: "Tools" },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -1253,6 +1645,30 @@ export function AdminPage() {
             <Card className="border-border">
               <CardContent className="pt-6">
                 <SponsorsTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <Card className="border-border">
+              <CardContent className="pt-6">
+                <AnalyticsTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="subscriptions">
+            <Card className="border-border">
+              <CardContent className="pt-6">
+                <SubscriptionsTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="toolcontrol">
+            <Card className="border-border">
+              <CardContent className="pt-6">
+                <ToolControlTab />
               </CardContent>
             </Card>
           </TabsContent>

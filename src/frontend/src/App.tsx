@@ -14,6 +14,15 @@ import { HTMLToPDF } from "@/pages/HTMLToPDF";
 import { HistoryPage } from "@/pages/HistoryPage";
 import { Home } from "@/pages/Home";
 import { ILoveIMGPage } from "@/pages/ILoveIMGPage";
+import { ImgCompress } from "@/pages/ImgCompress";
+import { ImgConvert } from "@/pages/ImgConvert";
+import { ImgCrop } from "@/pages/ImgCrop";
+import { ImgEditor } from "@/pages/ImgEditor";
+import { ImgRemoveBg } from "@/pages/ImgRemoveBg";
+import { ImgResize } from "@/pages/ImgResize";
+import { ImgRotate } from "@/pages/ImgRotate";
+import { ImgToPDF } from "@/pages/ImgToPDF";
+import { ImgWatermark } from "@/pages/ImgWatermark";
 import { JPGToPDF } from "@/pages/JPGToPDF";
 import { MergePDF } from "@/pages/MergePDF";
 import { OCRPDF } from "@/pages/OCRPDF";
@@ -39,6 +48,8 @@ import { SignPDF } from "@/pages/SignPDF";
 import { SplitPDF } from "@/pages/SplitPDF";
 import { TranslatePDF } from "@/pages/TranslatePDF";
 import { UnlockPDF } from "@/pages/UnlockPDF";
+import { UpgradePage } from "@/pages/UpgradePage";
+import { UserDashboard } from "@/pages/UserDashboard";
 import { WatermarkPDF } from "@/pages/WatermarkPDF";
 import { WordToPDF } from "@/pages/WordToPDF";
 import { WorkflowsPage } from "@/pages/WorkflowsPage";
@@ -266,6 +277,63 @@ const publicProfileRoute = createRoute({
   component: PublicProfilePage,
 });
 
+// Image tool routes
+const imgCompressRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/img-compress",
+  component: ImgCompress,
+});
+const imgResizeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/img-resize",
+  component: ImgResize,
+});
+const imgCropRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/img-crop",
+  component: ImgCrop,
+});
+const imgConvertRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/img-convert",
+  component: ImgConvert,
+});
+const imgRotateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/img-rotate",
+  component: ImgRotate,
+});
+const imgWatermarkRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/img-watermark",
+  component: ImgWatermark,
+});
+const imgToPdfRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/img-to-pdf",
+  component: ImgToPDF,
+});
+const imgRemoveBgRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/img-remove-bg",
+  component: ImgRemoveBg,
+});
+const imgEditorRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/img-editor",
+  component: ImgEditor,
+});
+const upgradeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/upgrade",
+  component: UpgradePage,
+});
+const dashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard",
+  component: UserDashboard,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   mergeRoute,
@@ -307,6 +375,18 @@ const routeTree = rootRoute.addChildren([
   profileRoute,
   adminRoute,
   publicProfileRoute,
+  // Image tools
+  imgCompressRoute,
+  imgResizeRoute,
+  imgCropRoute,
+  imgConvertRoute,
+  imgRotateRoute,
+  imgWatermarkRoute,
+  imgToPdfRoute,
+  imgRemoveBgRoute,
+  imgEditorRoute,
+  upgradeRoute,
+  dashboardRoute,
 ]);
 
 const router = createRouter({ routeTree });

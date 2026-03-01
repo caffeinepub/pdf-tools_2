@@ -13,7 +13,9 @@ import {
   FileImage,
   FileMinus,
   FileOutput,
+  FilePlus,
   FileText,
+  FlipHorizontal,
   GitCompare,
   Globe,
   Hash,
@@ -21,6 +23,7 @@ import {
   Languages,
   LayoutGrid,
   Lock,
+  Maximize2,
   Merge,
   Minimize2,
   PenLine,
@@ -627,6 +630,158 @@ export function Home() {
         </section>
       )}
 
+      {/* Image Tools Section */}
+      <section className="border-t border-border bg-muted/20">
+        <div className="container max-w-5xl py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+              <h2 className="font-display font-bold text-lg text-foreground flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-primary inline-block" />
+                Image Tools
+              </h2>
+              <Link to="/img-compress">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-ui text-xs gap-1.5"
+                >
+                  View all tools
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                {
+                  name: "Compress Image",
+                  path: "/img-compress",
+                  description:
+                    "Reduce file size with adjustable quality. Batch support.",
+                  icon: Minimize2,
+                  color: "#E25C3B",
+                  bgColor: "#FFF0EC",
+                },
+                {
+                  name: "Resize Image",
+                  path: "/img-resize",
+                  description: "Change dimensions. Lock aspect ratio.",
+                  icon: Maximize2,
+                  color: "#3B8CE2",
+                  bgColor: "#EBF3FF",
+                },
+                {
+                  name: "Crop Image",
+                  path: "/img-crop",
+                  description:
+                    "Drag crop handles. Preset ratios 1:1, 16:9, 4:3.",
+                  icon: Crop,
+                  color: "#2DBD6E",
+                  bgColor: "#EBFFF4",
+                },
+                {
+                  name: "Convert Image",
+                  path: "/img-convert",
+                  description: "Convert between JPG, PNG, WEBP. Batch + ZIP.",
+                  icon: Image,
+                  color: "#9B3BE2",
+                  bgColor: "#F5EBFF",
+                },
+                {
+                  name: "Rotate & Flip",
+                  path: "/img-rotate",
+                  description:
+                    "Rotate 90°/180°/270° or flip horizontally/vertically.",
+                  icon: FlipHorizontal,
+                  color: "#3BE2D4",
+                  bgColor: "#EBFDF9",
+                },
+                {
+                  name: "Watermark Image",
+                  path: "/img-watermark",
+                  description:
+                    "Add text watermarks with opacity and position control.",
+                  icon: Stamp,
+                  color: "#7C3BE2",
+                  bgColor: "#F0EBFF",
+                },
+                {
+                  name: "Image to PDF",
+                  path: "/img-to-pdf",
+                  description: "Combine multiple images into a PDF.",
+                  icon: FilePlus,
+                  color: "#E23B3B",
+                  bgColor: "#FFF0F0",
+                },
+                {
+                  name: "Remove Background",
+                  path: "/img-remove-bg",
+                  description: "Canvas-based background removal. Plus feature.",
+                  icon: Wand2,
+                  color: "#D94F34",
+                  bgColor: "#FFF3F0",
+                },
+                {
+                  name: "Image Editor",
+                  path: "/img-editor",
+                  description:
+                    "Brightness, contrast, blur, saturation, filters.",
+                  icon: PenLine,
+                  color: "#3B6CE2",
+                  bgColor: "#EBF0FF",
+                },
+              ].map((tool) => {
+                const Icon = tool.icon;
+                return (
+                  <motion.div
+                    key={tool.path}
+                    whileHover={{ y: -4, scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <Link
+                      to={tool.path}
+                      className="group block bg-card border border-border rounded-xl p-5 tool-card-shadow transition-all duration-200 hover:border-primary/30 relative overflow-hidden"
+                    >
+                      <div
+                        className="absolute inset-x-0 top-0 h-1 rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        style={{
+                          background: `linear-gradient(90deg, ${tool.color}88, ${tool.color})`,
+                        }}
+                      />
+                      <div className="flex items-start gap-4">
+                        <div
+                          className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                          style={{ backgroundColor: tool.bgColor }}
+                        >
+                          <Icon
+                            className="w-5 h-5"
+                            style={{ color: tool.color }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-display font-semibold text-sm text-foreground mb-1">
+                            {tool.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {tool.description}
+                          </p>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0 mt-1" />
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* iLoveIMG Promo Section */}
       <section className="border-t border-border bg-card/30">
         <div className="container max-w-5xl py-14">
@@ -666,7 +821,7 @@ export function Home() {
                       convert, and enhance with AI.
                     </p>
                   </div>
-                  <Link to="/" className="flex-shrink-0">
+                  <Link to="/img-compress" className="flex-shrink-0">
                     <Button
                       variant="outline"
                       className="font-ui gap-2 border-primary/30 hover:border-primary/60 hover:bg-primary/5"

@@ -1,39 +1,32 @@
 # PDF Tools
 
 ## Current State
+Admin settings (theme color, dark mode, header logo, footer branding, footer links, hidden services, sponsor posts, and tool control settings) are stored entirely in `localStorage` inside `AdminSettingsContext.tsx` and `ToolControlTab`. This means changes made in the admin panel are device-specific and not visible to other users or on other devices.
 
-- 11 PDF tools: merge, split, compress, rotate, watermark, protect, unlock, PDF to JPG, JPG to PDF, page numbers, organize.
-- Backend already supports `getHistory()`, `addHistoryEntry()`, `getToolUsage()`, `incrementToolUsage()`.
-- OrganizePDF already uses `motion/react` Reorder for drag-and-drop page reordering -- this feature is already implemented.
-- History hooks (`useHistory`, `useAddHistory`) already exist in `hooks/useQueries.ts`.
-- All tool pages call `addHistory` and `incrementUsage` on success.
-- No dedicated History page exists in the app.
-- Header has links to All Tools, Merge, Compress, PDF to JPG (desktop) and a full list on mobile.
+The backend (`main.mo`) has user profiles, history entries, tool usage stats, and authorization, but no admin settings storage.
 
 ## Requested Changes (Diff)
 
 ### Add
-- `/history` route and `HistoryPage` component that:
-  - Shows a list of all past processed files fetched via `useHistory()`.
-  - Each entry shows: tool name (with icon + color matching the home page tools), original filename, result filename, and timestamp (human-readable relative time like "2 hours ago").
-  - Shows an empty state when history is empty.
-  - Shows a loading skeleton while fetching.
-- "History" nav link in the Header (desktop nav and mobile menu).
+- Backend: `AdminSettings` type with all settings fields (hiddenServices, themeColor, darkMode, headerLogoText, headerLogoUrl, footerBrandName, footerLinks, footerCopyright, sponsorPosts, toolControl)
+- Backend: `getAdminSettings` public query -- returns current global admin settings (no auth required so all users can read theme/visibility)
+- Backend: `saveAdminSettings` shared func -- only admins can call this; persists settings to stable canister state
+- Frontend: On app load, fetch admin settings from backend and seed the context
+- Frontend: On every `updateSettings` call in `AdminSettingsContext`, also call `saveAdminSettings` on the backend (debounced)
+- Frontend: Tool control settings also migrated to backend
 
 ### Modify
-- `App.tsx`: add `/history` route.
-- `Header.tsx`: add "History" link to both desktop nav and mobile menu.
+- `AdminSettingsContext.tsx` -- replace `localStorage` read/write with backend canister read/write; keep local React state as cache for instant UI updates
+- `AdminPage.tsx` `ToolControlTab` -- replace `localStorage` with the same backend-persisted settings
+- `main.mo` -- add `AdminSettings` type and `getAdminSettings`/`saveAdminSettings` functions
 
 ### Remove
-- Nothing.
+- `localStorage.getItem/setItem` calls for admin settings in `AdminSettingsContext.tsx`
+- `localStorage.getItem/setItem` calls for tool control in `ToolControlTab`
 
 ## Implementation Plan
-
-1. Create `src/pages/HistoryPage.tsx`:
-   - Use `useHistory()` hook to fetch entries.
-   - Display entries in reverse chronological order (newest first).
-   - Each card: tool icon + color, tool display name, original file, result file, formatted timestamp.
-   - Loading skeleton (3-4 placeholder cards) while `isLoading`.
-   - Empty state illustration/message when no history.
-2. Update `App.tsx`: import `HistoryPage`, add `historyRoute` at `/history`, include in `routeTree`.
-3. Update `Header.tsx`: add "History" link with `History` icon or text in both desktop nav and mobile menu list.
+1. Add `AdminSettings` stable record and getter/setter functions to `main.mo`
+2. Regenerate `backend.d.ts` with new types
+3. Update `AdminSettingsContext.tsx` to load settings from backend on mount and save to backend on change
+4. Update `ToolControlTab` in `AdminPage.tsx` to read/write via backend
+5. Add loading state to context so app waits for backend settings before rendering
