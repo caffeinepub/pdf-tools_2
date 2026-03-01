@@ -10,7 +10,13 @@ import Time "mo:core/Time";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 
+import MixinAuthorization "authorization/MixinAuthorization";
+import AccessControl "authorization/access-control";
+
+
 actor {
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
   include MixinStorage();
 
   // Tool usage statistics
@@ -36,6 +42,15 @@ actor {
   // Map from principal to history entries array
   let userHistory = Map.empty<Principal, [HistoryEntry]>();
 
+  // User profile type
+  public type UserProfile = {
+    displayName : Text;
+    profilePicUrl : Text;
+  };
+
+  // Map from principal to user profiles
+  let userProfiles = Map.empty<Principal, UserProfile>();
+
   // Tool stats functions
   public shared ({ caller }) func incrementToolUsage(toolName : Text) : async Nat {
     let count = switch (toolUsage.get(toolName)) {
@@ -50,13 +65,12 @@ actor {
     toolUsage.toArray();
   };
 
-  // File reference functions
-  public shared ({ caller }) func addFileReference(_blob : Storage.ExternalBlob) : async () {
-    // Blobs are managed by blob-storage. No additional tracking in backend required.
-  };
-
   // History functions
   public shared ({ caller }) func addHistoryEntry(toolName : Text, originalFile : Text, resultFile : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add history entries");
+    };
+
     let newEntry : HistoryEntry = {
       toolName;
       originalFile;
@@ -73,6 +87,9 @@ actor {
   };
 
   public query ({ caller }) func getHistory() : async [HistoryEntry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view history");
+    };
     switch (userHistory.get(caller)) {
       case (null) { [] };
       case (?history) { history.sort() };
@@ -80,16 +97,43 @@ actor {
   };
 
   public query ({ caller }) func getAllUserHistories() : async [(Principal, [HistoryEntry])] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view all histories");
+    };
     let filtered = userHistory.entries().toArray();
     filtered;
   };
 
+  // User profile functions
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    userProfiles.get(caller);
+  };
+
+  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
+    userProfiles.get(user);
+  };
+
+  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
+    };
+    userProfiles.add(caller, profile);
+  };
+
   // Task coordination (simplified and not persistent)
   public shared ({ caller }) func submitTask(_tool : Text, _input : Text) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can submit tasks");
+    };
     1;
   };
 
   public shared ({ caller }) func updateTaskStatus(_taskId : Nat, _output : Text) : async () {
-    // Task status updated
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update task status");
+    };
   };
 };

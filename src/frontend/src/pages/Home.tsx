@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAdminSettings } from "@/contexts/AdminSettingsContext";
 import { useToolUsage } from "@/hooks/useQueries";
 import { Link } from "@tanstack/react-router";
 import {
@@ -426,6 +427,8 @@ function ToolCard({ tool, usageCount }: { tool: Tool; usageCount?: number }) {
 
 export function Home() {
   const { data: usageData } = useToolUsage();
+  const { settings } = useAdminSettings();
+  const { hiddenServices, sponsorPosts } = settings;
 
   const usageMap = usageData
     ? Object.fromEntries(
@@ -523,25 +526,106 @@ export function Home() {
           animate="visible"
           className="space-y-12"
         >
-          {CATEGORIES.map((category) => (
-            <motion.div key={category.label} variants={itemVariants}>
-              <h2 className="font-display font-bold text-lg text-foreground mb-4 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-primary inline-block" />
-                {category.label}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {category.tools.map((tool) => (
-                  <ToolCard
-                    key={tool.path}
-                    tool={tool}
-                    usageCount={usageMap[toolNameToKey[tool.name]]}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          ))}
+          {CATEGORIES.map((category) => {
+            const visibleTools = category.tools.filter(
+              (t) => !hiddenServices.includes(t.path),
+            );
+            if (visibleTools.length === 0) return null;
+            return (
+              <motion.div key={category.label} variants={itemVariants}>
+                <h2 className="font-display font-bold text-lg text-foreground mb-4 flex items-center gap-2">
+                  <span className="w-1 h-5 rounded-full bg-primary inline-block" />
+                  {category.label}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {visibleTools.map((tool) => (
+                    <ToolCard
+                      key={tool.path}
+                      tool={tool}
+                      usageCount={usageMap[toolNameToKey[tool.name]]}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </section>
+
+      {/* Sponsor Posters Section */}
+      {sponsorPosts.length > 0 && (
+        <section className="border-t border-border bg-card/20">
+          <div className="container max-w-5xl py-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="font-display font-bold text-lg text-foreground mb-6 flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-primary inline-block" />
+                Sponsors
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {sponsorPosts.map((post) =>
+                  post.link ? (
+                    <a
+                      key={post.id}
+                      href={post.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block group rounded-xl border border-border overflow-hidden bg-card shadow-card hover:shadow-card-hover transition-all duration-200 hover:border-primary/30"
+                    >
+                      <div className="overflow-hidden">
+                        <img
+                          src={post.imageUrl}
+                          alt={post.caption || "Sponsor"}
+                          className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect fill='%23f0f0f0' width='400' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23999' font-size='14'%3ESponsor%3C/text%3E%3C/svg%3E";
+                          }}
+                        />
+                      </div>
+                      {post.caption && (
+                        <div className="px-4 py-3">
+                          <p className="font-ui text-sm text-foreground line-clamp-2">
+                            {post.caption}
+                          </p>
+                        </div>
+                      )}
+                    </a>
+                  ) : (
+                    <div
+                      key={post.id}
+                      className="group rounded-xl border border-border overflow-hidden bg-card shadow-card hover:shadow-card-hover transition-all duration-200 hover:border-primary/30"
+                    >
+                      <div className="overflow-hidden">
+                        <img
+                          src={post.imageUrl}
+                          alt={post.caption || "Sponsor"}
+                          className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect fill='%23f0f0f0' width='400' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23999' font-size='14'%3ESponsor%3C/text%3E%3C/svg%3E";
+                          }}
+                        />
+                      </div>
+                      {post.caption && (
+                        <div className="px-4 py-3">
+                          <p className="font-ui text-sm text-foreground line-clamp-2">
+                            {post.caption}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ),
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* iLoveIMG Promo Section */}
       <section className="border-t border-border bg-card/30">
@@ -562,7 +646,7 @@ export function Home() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h2 className="font-display font-bold text-xl text-foreground">
-                        iLoveIMG
+                        PhoneBaba
                       </h2>
                       <Badge
                         variant="secondary"
@@ -577,18 +661,18 @@ export function Home() {
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Need to work with images too? iLoveIMG offers the same
+                      Need to work with images too? PhoneBaba offers the same
                       easy PDF experience for images — compress, resize, crop,
                       convert, and enhance with AI.
                     </p>
                   </div>
-                  <Link to="/ilovepdf" className="flex-shrink-0">
+                  <Link to="/" className="flex-shrink-0">
                     <Button
                       variant="outline"
                       className="font-ui gap-2 border-primary/30 hover:border-primary/60 hover:bg-primary/5"
                     >
                       <Image className="w-4 h-4" />
-                      Explore iLoveIMG
+                      Explore PhoneBaba
                       <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>

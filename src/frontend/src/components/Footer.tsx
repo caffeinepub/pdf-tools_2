@@ -1,9 +1,12 @@
+import { useAdminSettings } from "@/contexts/AdminSettingsContext";
 import { Link } from "@tanstack/react-router";
 import { FileText, Heart } from "lucide-react";
 
 export function Footer() {
   const year = new Date().getFullYear();
   const caffeineUrl = `https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`;
+  const { settings } = useAdminSettings();
+  const { footerBrandName, footerLinks, footerCopyright } = settings;
 
   return (
     <footer className="border-t border-border bg-card/50 mt-16">
@@ -15,52 +18,62 @@ export function Footer() {
               <FileText className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="font-display font-bold text-foreground text-base">
-              PDF<span className="text-primary">Tools</span>
+              {footerBrandName || "PDFTools"}
             </span>
           </div>
 
           {/* Links */}
           <nav className="flex flex-wrap gap-4 text-sm font-ui text-muted-foreground">
-            <Link
-              to="/merge"
-              className="hover:text-foreground transition-colors"
-            >
-              Merge PDF
-            </Link>
-            <Link
-              to="/split"
-              className="hover:text-foreground transition-colors"
-            >
-              Split PDF
-            </Link>
-            <Link
-              to="/compress"
-              className="hover:text-foreground transition-colors"
-            >
-              Compress PDF
-            </Link>
-            <Link
-              to="/protect"
-              className="hover:text-foreground transition-colors"
-            >
-              Protect PDF
-            </Link>
+            {footerLinks.map((link) => {
+              // Check if it's an external link
+              const isExternal =
+                link.url.startsWith("http://") ||
+                link.url.startsWith("https://");
+              if (isExternal) {
+                return (
+                  <a
+                    key={link.url}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                );
+              }
+              return (
+                <Link
+                  key={link.url}
+                  to={link.url}
+                  className="hover:text-foreground transition-colors"
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
-          {/* Attribution */}
-          <p className="text-sm text-muted-foreground font-ui flex items-center gap-1">
-            © {year}. Built with{" "}
-            <Heart className="w-3.5 h-3.5 text-primary inline fill-primary" />{" "}
-            using{" "}
-            <a
-              href={caffeineUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              caffeine.ai
-            </a>
-          </p>
+          {/* Attribution / copyright */}
+          {footerCopyright ? (
+            <p className="text-sm text-muted-foreground font-ui">
+              {footerCopyright}
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground font-ui flex items-center gap-1">
+              © {year}. Built with{" "}
+              <Heart className="w-3.5 h-3.5 text-primary inline fill-primary" />{" "}
+              using{" "}
+              <a
+                href={caffeineUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                caffeine.ai
+              </a>
+            </p>
+          )}
         </div>
       </div>
     </footer>

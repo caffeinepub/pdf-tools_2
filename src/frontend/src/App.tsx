@@ -2,6 +2,8 @@ import { Footer } from "@/components/Footer";
 import { GeminiChat } from "@/components/GeminiChat";
 import { Header } from "@/components/Header";
 import { Toaster } from "@/components/ui/sonner";
+import { AdminSettingsProvider } from "@/contexts/AdminSettingsContext";
+import { AdminPage } from "@/pages/AdminPage";
 import { ComparePDF } from "@/pages/ComparePDF";
 import { CompressPDF } from "@/pages/CompressPDF";
 import { CropPDF } from "@/pages/CropPDF";
@@ -25,7 +27,9 @@ import { PDFToWord } from "@/pages/PDFToWord";
 import { PageNumbers } from "@/pages/PageNumbers";
 import { PowerPointToPDF } from "@/pages/PowerPointToPDF";
 import { PremiumPage } from "@/pages/PremiumPage";
+import { ProfilePage } from "@/pages/ProfilePage";
 import { ProtectPDF } from "@/pages/ProtectPDF";
+import { PublicProfilePage } from "@/pages/PublicProfilePage";
 import { RedactPDF } from "@/pages/RedactPDF";
 import { RemovePages } from "@/pages/RemovePages";
 import { RepairPDF } from "@/pages/RepairPDF";
@@ -49,15 +53,17 @@ import {
 // Root layout
 const rootRoute = createRootRoute({
   component: () => (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      <div className="flex-1">
-        <Outlet />
+    <AdminSettingsProvider>
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <div className="flex-1">
+          <Outlet />
+        </div>
+        <Footer />
+        <Toaster position="bottom-right" richColors />
+        <GeminiChat />
       </div>
-      <Footer />
-      <Toaster position="bottom-right" richColors />
-      <GeminiChat />
-    </div>
+    </AdminSettingsProvider>
   ),
 });
 
@@ -244,6 +250,21 @@ const ilovepdfRoute = createRoute({
   path: "/ilovepdf",
   component: ILoveIMGPage,
 });
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/profile",
+  component: ProfilePage,
+});
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin",
+  component: AdminPage,
+});
+const publicProfileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/user/$principalId",
+  component: PublicProfilePage,
+});
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -283,6 +304,9 @@ const routeTree = rootRoute.addChildren([
   workflowsRoute,
   premiumRoute,
   ilovepdfRoute,
+  profileRoute,
+  adminRoute,
+  publicProfileRoute,
 ]);
 
 const router = createRouter({ routeTree });

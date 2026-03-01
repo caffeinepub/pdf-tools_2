@@ -7,13 +7,6 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
-export class ExternalBlob {
-    getBytes(): Promise<Uint8Array<ArrayBuffer>>;
-    getDirectURL(): string;
-    static fromURL(url: string): ExternalBlob;
-    static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
-    withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
-}
 export type Time = bigint;
 export interface HistoryEntry {
     originalFile: string;
@@ -21,13 +14,27 @@ export interface HistoryEntry {
     resultFile: string;
     toolName: string;
 }
+export interface UserProfile {
+    profilePicUrl: string;
+    displayName: string;
+}
+export enum UserRole {
+    admin = "admin",
+    user = "user",
+    guest = "guest"
+}
 export interface backendInterface {
-    addFileReference(_blob: ExternalBlob): Promise<void>;
     addHistoryEntry(toolName: string, originalFile: string, resultFile: string): Promise<void>;
+    assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     getAllUserHistories(): Promise<Array<[Principal, Array<HistoryEntry>]>>;
+    getCallerUserProfile(): Promise<UserProfile | null>;
+    getCallerUserRole(): Promise<UserRole>;
     getHistory(): Promise<Array<HistoryEntry>>;
     getToolUsage(): Promise<Array<[string, bigint]>>;
+    getUserProfile(user: Principal): Promise<UserProfile | null>;
     incrementToolUsage(toolName: string): Promise<bigint>;
+    isCallerAdmin(): Promise<boolean>;
+    saveCallerUserProfile(profile: UserProfile): Promise<void>;
     submitTask(_tool: string, _input: string): Promise<bigint>;
     updateTaskStatus(_taskId: bigint, _output: string): Promise<void>;
 }

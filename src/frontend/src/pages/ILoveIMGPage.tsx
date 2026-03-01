@@ -81,7 +81,7 @@ export function ILoveIMGPage() {
               <span>Home</span>
             </Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-foreground font-medium">iLoveIMG</span>
+            <span className="text-foreground font-medium">PhoneBaba</span>
           </nav>
         </div>
       </div>
@@ -105,7 +105,7 @@ export function ILoveIMGPage() {
             Sister Service
           </Badge>
           <h1 className="font-display font-bold text-4xl text-foreground mb-4">
-            iLoveIMG
+            PhoneBaba
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-2">
             The same easy-to-use experience you love for PDFs — now for images.
@@ -204,27 +204,23 @@ export function ILoveIMGPage() {
           className="text-center"
         >
           <h2 className="font-display font-bold text-2xl text-foreground mb-3">
-            Try iLoveIMG — it's free
+            Try PhoneBaba — it's free
           </h2>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Visit ilovepdf.com to access all image tools. Same trusted
-            experience, built for images.
+            Visit PhoneBaba to access all image tools. Same trusted experience,
+            built for images.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <a
-              href="https://www.ilovepdf.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link to="/">
               <Button
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground font-ui font-semibold"
               >
                 <Image className="mr-2 w-4 h-4" />
-                Open iLoveIMG
+                Open PhoneBaba
                 <ChevronRight className="ml-1 w-4 h-4" />
               </Button>
-            </a>
+            </Link>
             <Link to="/">
               <Button variant="outline" size="lg" className="font-ui">
                 Back to PDF Tools

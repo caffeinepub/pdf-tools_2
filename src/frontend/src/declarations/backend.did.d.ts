@@ -10,7 +10,6 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export type ExternalBlob = Uint8Array;
 export interface HistoryEntry {
   'originalFile' : string,
   'timestamp' : Time,
@@ -18,6 +17,13 @@ export interface HistoryEntry {
   'toolName' : string,
 }
 export type Time = bigint;
+export interface UserProfile {
+  'profilePicUrl' : string,
+  'displayName' : string,
+}
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
   'blob_hash' : string,
@@ -45,15 +51,21 @@ export interface _SERVICE {
     _CaffeineStorageRefillResult
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
-  'addFileReference' : ActorMethod<[ExternalBlob], undefined>,
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addHistoryEntry' : ActorMethod<[string, string, string], undefined>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'getAllUserHistories' : ActorMethod<
     [],
     Array<[Principal, Array<HistoryEntry>]>
   >,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getHistory' : ActorMethod<[], Array<HistoryEntry>>,
   'getToolUsage' : ActorMethod<[], Array<[string, bigint]>>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'incrementToolUsage' : ActorMethod<[string], bigint>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'submitTask' : ActorMethod<[string, string], bigint>,
   'updateTaskStatus' : ActorMethod<[bigint, string], undefined>,
 }

@@ -19,13 +19,21 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
-export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
 export const Time = IDL.Int;
 export const HistoryEntry = IDL.Record({
   'originalFile' : IDL.Text,
   'timestamp' : Time,
   'resultFile' : IDL.Text,
   'toolName' : IDL.Text,
+});
+export const UserProfile = IDL.Record({
+  'profilePicUrl' : IDL.Text,
+  'displayName' : IDL.Text,
 });
 
 export const idlService = IDL.Service({
@@ -55,20 +63,30 @@ export const idlService = IDL.Service({
       [],
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
-  'addFileReference' : IDL.Func([ExternalBlob], [], []),
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'addHistoryEntry' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'getAllUserHistories' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(HistoryEntry)))],
       ['query'],
     ),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getHistory' : IDL.Func([], [IDL.Vec(HistoryEntry)], ['query']),
   'getToolUsage' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Nat))],
       ['query'],
     ),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
   'incrementToolUsage' : IDL.Func([IDL.Text], [IDL.Nat], []),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'submitTask' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
   'updateTaskStatus' : IDL.Func([IDL.Nat, IDL.Text], [], []),
 });
@@ -87,13 +105,21 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
-  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
   const Time = IDL.Int;
   const HistoryEntry = IDL.Record({
     'originalFile' : IDL.Text,
     'timestamp' : Time,
     'resultFile' : IDL.Text,
     'toolName' : IDL.Text,
+  });
+  const UserProfile = IDL.Record({
+    'profilePicUrl' : IDL.Text,
+    'displayName' : IDL.Text,
   });
   
   return IDL.Service({
@@ -123,20 +149,30 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
-    'addFileReference' : IDL.Func([ExternalBlob], [], []),
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'addHistoryEntry' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'getAllUserHistories' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(HistoryEntry)))],
         ['query'],
       ),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getHistory' : IDL.Func([], [IDL.Vec(HistoryEntry)], ['query']),
     'getToolUsage' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Nat))],
         ['query'],
       ),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
     'incrementToolUsage' : IDL.Func([IDL.Text], [IDL.Nat], []),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'submitTask' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
     'updateTaskStatus' : IDL.Func([IDL.Nat, IDL.Text], [], []),
   });
