@@ -59,6 +59,7 @@ import { ScanToPDF } from "@/pages/ScanToPDF";
 import { SignPDF } from "@/pages/SignPDF";
 import { SplitPDF } from "@/pages/SplitPDF";
 import { SponsorDashboard } from "@/pages/SponsorDashboard";
+import { SuperAdminDashboard } from "@/pages/SuperAdminDashboard";
 import { TermsPage } from "@/pages/TermsPage";
 import { TranslatePDF } from "@/pages/TranslatePDF";
 import { UnlockPDF } from "@/pages/UnlockPDF";
@@ -404,6 +405,12 @@ const notificationsRoute = createRoute({
   component: NotificationsPage,
 });
 
+const superAdminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/super-admin",
+  component: SuperAdminDashboard,
+});
+
 // Company / info routes
 const aboutRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -491,6 +498,7 @@ const routeTree = rootRoute.addChildren([
   contactRoute,
   privacyRoute,
   termsRoute,
+  superAdminRoute,
 ]);
 
 const router = createRouter({ routeTree });

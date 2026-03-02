@@ -1,35 +1,34 @@
-# PDF Tools
+# PDF Tools – Multi-Role Dashboard Upgrade
 
 ## Current State
-- Full-stack PDF + Image tools platform on ICP
-- Has a simple footer (Footer.tsx) with brand name, a few tool links, and optional copyright text pulled from AdminSettings
-- Profile page allows uploading profile photo and display name, saved to backend
-- Header shows profile photo from `useGetProfile()` data -- but only refreshes when the query cache updates, so after saving on ProfilePage, the header may not immediately reflect the new photo
-- No Privacy Policy, Contact, About, or Terms pages exist
-- Desktop header and layout are complete and should not be changed
+The app has:
+- `/dashboard` → UserDashboard: basic usage stats, history, plan card
+- `/creator-dashboard` → CreatorDashboard: localStorage-based creator profile + product management
+- `/sponsor-dashboard` → SponsorDashboard: ad creation form wired to backend actor
+- `/admin` → AdminPage: admin login + 6 tabs (Services, Theme, Header, Footer, Users, Sponsors)
+
+All existing pages function correctly and must not be changed.
 
 ## Requested Changes (Diff)
 
 ### Add
-- `/privacy` -- Privacy Policy page (professional, multi-section)
-- `/contact` -- Contact Us page with a simple form (name, email, message) and contact info cards
-- `/about` -- About Us page describing the platform, mission, team section placeholder
-- `/terms` -- Terms of Service page (professional, multi-section)
-- Footer rebuilt as a multi-column professional footer with sections: Tools, Company (About, Contact, Privacy, Terms), and a bottom bar with copyright -- no "Built with caffeine.ai" text anywhere
+- **Normal User Dashboard** (`/dashboard`) – enhanced with left collapsible sidebar, glassmorphism stat cards, recently viewed projects, trending creators, ads banner, follow/unfollow toggle, share/QR buttons, like/comment/star rating UI. All static demo data.
+- **Creator Advanced Dashboard** (`/creator-dashboard`) – enhanced with left collapsible sidebar, analytics cards (revenue, followers growth, avg rating), monthly sales chart (CSS-based), service management panel (upload PDF/PPT/Resume, set price, coupon, GitHub link), earnings/tips section, reviews section. All static demo data, existing localStorage product logic preserved.
+- **Business Owner Ads Panel** (`/sponsor-dashboard`) – enhanced with left collapsible sidebar, stats (clicks, impressions, CTR, likes, comments, star rating, conversion), ads creation form (banner, link, CTA, targeting filters, budget, boost), charts (clicks/day, engagement), product section. All static demo data, existing ad creation logic preserved.
+- **Admin Super Dashboard** (`/admin`) – the existing admin page already exists; add a new standalone route `/super-admin` for the full super admin panel with dark theme, multi-level sidebar (All Users > Normal/Creator/Business), suspension control, reports, revenue, subscription control, feature toggle, logs, broadcast. All static demo data layered on top.
 
 ### Modify
-- `Footer.tsx` -- Replace current single-row footer with a proper multi-column footer (Product tools column, Company links column, bottom copyright bar). Must still use AdminSettings footerBrandName/footerCopyright/footerLinks but layout becomes multi-column.
-- `App.tsx` -- Add routes for `/privacy`, `/contact`, `/about`, `/terms`
-- Profile photo update flow -- After saving profile, invalidate the `getProfile` query cache so the header avatar updates immediately everywhere without a page reload
+- `/dashboard` – replace UserDashboard with the new enhanced version that includes the collapsible left sidebar while keeping existing localStorage history/plan logic intact.
+- `/creator-dashboard` – replace CreatorDashboard with new version adding collapsible sidebar while keeping localStorage product/profile logic.
+- `/sponsor-dashboard` – replace SponsorDashboard with new version adding collapsible sidebar while keeping existing ad logic.
 
 ### Remove
-- Nothing removed
+- Nothing removed.
 
 ## Implementation Plan
-1. Create `src/frontend/src/pages/PrivacyPage.tsx` -- full privacy policy with sections
-2. Create `src/frontend/src/pages/ContactPage.tsx` -- contact page with form + info cards
-3. Create `src/frontend/src/pages/AboutPage.tsx` -- about page with mission + features highlights
-4. Create `src/frontend/src/pages/TermsPage.tsx` -- terms of service with sections
-5. Rebuild `Footer.tsx` as a multi-column professional footer; keep footerBrandName/footerCopyright from AdminSettings; hardcode Privacy/Contact/About/Terms links in the Company column; put the top tool links in a Tools column; bottom bar shows copyright if set
-6. Update `App.tsx` to import and register the 4 new page routes
-7. Fix profile photo refresh -- in `ProfilePage.tsx` `handleSave` onSuccess callback, call `queryClient.invalidateQueries` on the `getProfile` query key so header avatar updates instantly
+1. Create `NormalUserDashboard.tsx` with left toggle sidebar, static widgets (downloads, followers, recent projects, trending creators, ad banners), like/star/share/QR UI. Keep history/plan from localStorage.
+2. Create enhanced `CreatorDashboard.tsx` with left sidebar, static analytics charts (CSS bars), service management, earnings, tips, reviews panels – preserve existing product/profile localStorage logic.
+3. Create enhanced `SponsorDashboard.tsx` with left sidebar, full stats cards, ad creation with targeting filters, static charts, product table – preserve existing actor ad logic.
+4. Create `SuperAdminDashboard.tsx` at `/super-admin` with dark theme, multi-level sidebar, user management table, ads moderation, revenue charts, broadcast, logs – all static data.
+5. Wire new `/super-admin` route in App.tsx.
+6. Update App.tsx imports to use new dashboard components.
