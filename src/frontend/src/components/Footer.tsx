@@ -1,10 +1,8 @@
 import { useAdminSettings } from "@/contexts/AdminSettingsContext";
 import { Link } from "@tanstack/react-router";
-import { FileText, Heart } from "lucide-react";
+import { FileText } from "lucide-react";
 
 export function Footer() {
-  const year = new Date().getFullYear();
-  const caffeineUrl = `https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`;
   const { settings } = useAdminSettings();
   const { footerBrandName, footerLinks, footerCopyright } = settings;
 
@@ -55,23 +53,9 @@ export function Footer() {
           </nav>
 
           {/* Attribution / copyright */}
-          {footerCopyright ? (
+          {footerCopyright && (
             <p className="text-sm text-muted-foreground font-ui">
               {footerCopyright}
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground font-ui flex items-center gap-1">
-              © {year}. Built with{" "}
-              <Heart className="w-3.5 h-3.5 text-primary inline fill-primary" />{" "}
-              using{" "}
-              <a
-                href={caffeineUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                caffeine.ai
-              </a>
             </p>
           )}
         </div>

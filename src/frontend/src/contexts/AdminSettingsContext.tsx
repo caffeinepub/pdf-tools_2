@@ -96,6 +96,18 @@ function hexToOklchApprox(hex: string): string {
   return `${L.toFixed(4)} ${C.toFixed(4)} ${H.toFixed(2)}`;
 }
 
+/** Safely call saveAdminSettingsJson on the actor if the method exists */
+function trySaveToBackend(actor: unknown, json: string): void {
+  if (!actor) return;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const actorAny = actor as any;
+  if (typeof actorAny.saveAdminSettingsJson !== "function") return;
+  // Fire-and-forget — silently ignore errors (user may not be admin)
+  actorAny.saveAdminSettingsJson(json).catch(() => {
+    // Intentionally swallowed
+  });
+}
+
 interface AdminSettingsContextValue {
   settings: AdminSettings;
   updateSettings: (partial: Partial<AdminSettings>) => void;
@@ -120,7 +132,15 @@ export function AdminSettingsProvider({
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
+        const parsed = JSON.parse(stored);
+        // Strip old caffeine.ai attribution if present
+        if (
+          typeof parsed.footerCopyright === "string" &&
+          parsed.footerCopyright.toLowerCase().includes("caffeine")
+        ) {
+          parsed.footerCopyright = "";
+        }
+        return { ...DEFAULT_SETTINGS, ...parsed };
       }
     } catch {
       // ignore
@@ -135,9 +155,21 @@ export function AdminSettingsProvider({
     const fetchSettings = async () => {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const json = await (actor as any).getAdminSettingsJson();
+        const actorAny = actor as any;
+        // Guard: method may not exist if IDL is stale
+        if (typeof actorAny.getAdminSettingsJson !== "function") {
+          return;
+        }
+        const json = await actorAny.getAdminSettingsJson();
         if (json && json !== "{}") {
           const parsed = JSON.parse(json);
+          // Strip old caffeine.ai attribution if present
+          if (
+            typeof parsed.footerCopyright === "string" &&
+            parsed.footerCopyright.toLowerCase().includes("caffeine")
+          ) {
+            parsed.footerCopyright = "";
+          }
           const merged = { ...DEFAULT_SETTINGS, ...parsed };
           setSettings(merged);
           // Update localStorage cache with server data
@@ -181,28 +213,35 @@ export function AdminSettingsProvider({
 
   const updateSettings = useCallback(
     (partial: Partial<AdminSettings>) => {
-      setSettings((prev) => {
-        const newSettings = { ...prev, ...partial };
+      // Compute next settings synchronously so we have the value for the
+      // backend call without relying on async state reads.
+      let newSettings: AdminSettings = DEFAULT_SETTINGS;
 
-        // Update localStorage cache immediately
+      setSettings((prev) => {
+        newSettings = { ...prev, ...partial };
+
+        // Update localStorage cache immediately inside the updater so the
+        // cache is always in sync before the re-render.
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
         } catch {
           // ignore
         }
 
-        // Persist to backend (fire-and-forget; silently fails for non-admins)
-        if (actor && !isFetching) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (actor as any)
-            .saveAdminSettingsJson(JSON.stringify(newSettings))
-            .catch(() => {
-              // User may not be admin — ignore the error
-            });
-        }
-
         return newSettings;
       });
+
+      // Persist to backend OUTSIDE the state updater so any errors are
+      // properly caught and never bubble up through React's error boundary.
+      if (actor && !isFetching) {
+        // Use setTimeout(0) to ensure the state update has been committed
+        // and localStorage holds the latest value.
+        setTimeout(() => {
+          const latestJson =
+            localStorage.getItem(STORAGE_KEY) || JSON.stringify(newSettings);
+          trySaveToBackend(actor, latestJson);
+        }, 0);
+      }
     },
     [actor, isFetching],
   );
@@ -217,12 +256,9 @@ export function AdminSettingsProvider({
       // ignore
     }
 
-    // Reset on backend (fire-and-forget)
+    // Reset on backend (fire-and-forget; safe guard inside trySaveToBackend)
     if (actor && !isFetching) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (actor as any).saveAdminSettingsJson("{}").catch(() => {
-        // User may not be admin — ignore the error
-      });
+      trySaveToBackend(actor, "{}");
     }
   }, [actor, isFetching]);
 

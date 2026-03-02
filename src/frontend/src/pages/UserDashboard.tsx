@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { usePlatformRole } from "@/contexts/PlatformRoleContext";
 import { Link } from "@tanstack/react-router";
 import {
   BarChart3,
+  Bell,
   Crown,
   Download,
   History,
   Settings,
+  ShoppingBag,
   User,
   Zap,
 } from "lucide-react";
@@ -60,11 +63,23 @@ function downloadCSV(history: ImgHistoryEntry[]) {
   URL.revokeObjectURL(url);
 }
 
+const ROLE_BADGE_CONFIG: Record<
+  string,
+  { label: string; color: string; bg: string }
+> = {
+  creator: { label: "Creator", color: "#3B8CE2", bg: "#EBF3FF" },
+  plus: { label: "Plus", color: "#E2A83B", bg: "#FFFBEB" },
+  admin: { label: "Admin", color: "#E25C3B", bg: "#FFF0EC" },
+};
+
 export function UserDashboard() {
   const plan = getUserPlan();
   const dailyUsage = getDailyUsage();
   const dailyLimit = plan === "plus" ? Number.POSITIVE_INFINITY : 20;
   const history = getImgHistory();
+  const { platformRole } = usePlatformRole();
+  const roleBadge =
+    platformRole !== "free" ? ROLE_BADGE_CONFIG[platformRole] : null;
 
   const toolCounts: Record<string, number> = {};
   for (const h of history) {
@@ -97,14 +112,27 @@ export function UserDashboard() {
         >
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h1 className="font-display font-bold text-3xl text-foreground">
-                My Dashboard
-              </h1>
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className="font-display font-bold text-3xl text-foreground">
+                  My Dashboard
+                </h1>
+                {roleBadge && (
+                  <Badge
+                    className="font-ui text-xs border-0"
+                    style={{
+                      backgroundColor: roleBadge.bg,
+                      color: roleBadge.color,
+                    }}
+                  >
+                    {roleBadge.label}
+                  </Badge>
+                )}
+              </div>
               <p className="text-muted-foreground mt-1">
                 Track your usage, history, and plan status
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <Link to="/profile">
                 <Button variant="outline" className="font-ui gap-2" size="sm">
                   <User className="w-4 h-4" />
@@ -249,6 +277,42 @@ export function UserDashboard() {
                       className="w-full font-ui text-sm"
                       style={{ borderColor: `${item.color}30` }}
                     >
+                      {item.label}
+                    </Button>
+                  </Link>
+                ))}
+              </div>
+              <div className="grid grid-cols-3 gap-3 mt-3">
+                {[
+                  {
+                    label: "Creator Dashboard",
+                    path: "/creator-dashboard",
+                    icon: ShoppingBag,
+                    color: "#E25C3B",
+                  },
+                  {
+                    label: "Notifications",
+                    path: "/notifications",
+                    icon: Bell,
+                    color: "#3B8CE2",
+                  },
+                  {
+                    label: "Sponsor Ads",
+                    path: "/sponsor-dashboard",
+                    icon: BarChart3,
+                    color: "#E2A83B",
+                  },
+                ].map((item) => (
+                  <Link key={item.path} to={item.path}>
+                    <Button
+                      variant="outline"
+                      className="w-full font-ui text-xs gap-1.5"
+                      style={{ borderColor: `${item.color}30` }}
+                    >
+                      <item.icon
+                        className="w-3.5 h-3.5"
+                        style={{ color: item.color }}
+                      />
                       {item.label}
                     </Button>
                   </Link>

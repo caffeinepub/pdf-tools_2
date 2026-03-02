@@ -3,9 +3,12 @@ import { GeminiChat } from "@/components/GeminiChat";
 import { Header } from "@/components/Header";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminSettingsProvider } from "@/contexts/AdminSettingsContext";
+import { PlatformRoleProvider } from "@/contexts/PlatformRoleContext";
 import { AdminPage } from "@/pages/AdminPage";
 import { ComparePDF } from "@/pages/ComparePDF";
 import { CompressPDF } from "@/pages/CompressPDF";
+import { CreatorDashboard } from "@/pages/CreatorDashboard";
+import { CreatorProfile } from "@/pages/CreatorProfile";
 import { CropPDF } from "@/pages/CropPDF";
 import { EditPDF } from "@/pages/EditPDF";
 import { ExcelToPDF } from "@/pages/ExcelToPDF";
@@ -24,7 +27,9 @@ import { ImgRotate } from "@/pages/ImgRotate";
 import { ImgToPDF } from "@/pages/ImgToPDF";
 import { ImgWatermark } from "@/pages/ImgWatermark";
 import { JPGToPDF } from "@/pages/JPGToPDF";
+import { Marketplace } from "@/pages/Marketplace";
 import { MergePDF } from "@/pages/MergePDF";
+import { NotificationsPage } from "@/pages/NotificationsPage";
 import { OCRPDF } from "@/pages/OCRPDF";
 import { OptimizePDF } from "@/pages/OptimizePDF";
 import { OrganizePDF } from "@/pages/OrganizePDF";
@@ -36,6 +41,7 @@ import { PDFToWord } from "@/pages/PDFToWord";
 import { PageNumbers } from "@/pages/PageNumbers";
 import { PowerPointToPDF } from "@/pages/PowerPointToPDF";
 import { PremiumPage } from "@/pages/PremiumPage";
+import { ProductDetail } from "@/pages/ProductDetail";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { ProtectPDF } from "@/pages/ProtectPDF";
 import { PublicProfilePage } from "@/pages/PublicProfilePage";
@@ -46,6 +52,7 @@ import { RotatePDF } from "@/pages/RotatePDF";
 import { ScanToPDF } from "@/pages/ScanToPDF";
 import { SignPDF } from "@/pages/SignPDF";
 import { SplitPDF } from "@/pages/SplitPDF";
+import { SponsorDashboard } from "@/pages/SponsorDashboard";
 import { TranslatePDF } from "@/pages/TranslatePDF";
 import { UnlockPDF } from "@/pages/UnlockPDF";
 import { UpgradePage } from "@/pages/UpgradePage";
@@ -65,15 +72,17 @@ import {
 const rootRoute = createRootRoute({
   component: () => (
     <AdminSettingsProvider>
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <div className="flex-1">
-          <Outlet />
+      <PlatformRoleProvider>
+        <div className="min-h-screen flex flex-col bg-background">
+          <Header />
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          <Footer />
+          <Toaster position="bottom-right" richColors />
+          <GeminiChat />
         </div>
-        <Footer />
-        <Toaster position="bottom-right" richColors />
-        <GeminiChat />
-      </div>
+      </PlatformRoleProvider>
     </AdminSettingsProvider>
   ),
 });
@@ -334,6 +343,38 @@ const dashboardRoute = createRoute({
   component: UserDashboard,
 });
 
+// New marketplace / social routes
+const marketplaceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/marketplace",
+  component: Marketplace,
+});
+const productDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/product/$id",
+  component: ProductDetail,
+});
+const creatorProfileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/creator/$principalId",
+  component: CreatorProfile,
+});
+const creatorDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/creator-dashboard",
+  component: CreatorDashboard,
+});
+const sponsorDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/sponsor-dashboard",
+  component: SponsorDashboard,
+});
+const notificationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/notifications",
+  component: NotificationsPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   mergeRoute,
@@ -387,6 +428,13 @@ const routeTree = rootRoute.addChildren([
   imgEditorRoute,
   upgradeRoute,
   dashboardRoute,
+  // Marketplace / social
+  marketplaceRoute,
+  productDetailRoute,
+  creatorProfileRoute,
+  creatorDashboardRoute,
+  sponsorDashboardRoute,
+  notificationsRoute,
 ]);
 
 const router = createRouter({ routeTree });

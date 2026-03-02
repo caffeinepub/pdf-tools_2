@@ -1,20 +1,70 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAdminSettings } from "@/contexts/AdminSettingsContext";
+import { usePlatformRole } from "@/contexts/PlatformRoleContext";
+import { useActor } from "@/hooks/useActor";
 import { useInternetIdentity } from "@/hooks/useInternetIdentity";
 import { useGetProfile, useIsAdmin } from "@/hooks/useQueries";
 import { Link } from "@tanstack/react-router";
 import {
+  Bell,
   FileText,
   Loader2,
   LogIn,
   LogOut,
   Menu,
   Settings,
+  ShoppingBag,
   User,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const ROLE_BADGE: Record<string, { label: string; color: string; bg: string }> =
+  {
+    creator: { label: "Creator", color: "#3B8CE2", bg: "#EBF3FF" },
+    plus: { label: "Plus", color: "#E2A83B", bg: "#FFFBEB" },
+    admin: { label: "Admin", color: "#E25C3B", bg: "#FFF0EC" },
+  };
+
+function NotificationBell() {
+  const { actor, isFetching } = useActor();
+  const { identity } = useInternetIdentity();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    async function loadCount() {
+      if (!actor || isFetching || !identity) return;
+      try {
+        if (typeof (actor as any).getUnreadNotificationCount === "function") {
+          const count = await (actor as any).getUnreadNotificationCount();
+          setUnreadCount(Number(count || 0));
+        }
+      } catch {}
+    }
+    loadCount();
+    const interval = setInterval(loadCount, 30000);
+    return () => clearInterval(interval);
+  }, [actor, isFetching, identity]);
+
+  if (!identity) return null;
+
+  return (
+    <Link
+      to="/notifications"
+      className="relative flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+      aria-label="Notifications"
+    >
+      <Bell className="w-4 h-4" />
+      {unreadCount > 0 && (
+        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-bold font-ui flex items-center justify-center">
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </span>
+      )}
+    </Link>
+  );
+}
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -24,6 +74,7 @@ export function Header() {
   const { data: isAdmin } = useIsAdmin();
   const { settings } = useAdminSettings();
   const { headerLogoText, headerLogoUrl } = settings;
+  const { platformRole } = usePlatformRole();
 
   const principalStr = identity?.getPrincipal().toString();
   const displayLabel = profile?.displayName
@@ -43,6 +94,8 @@ export function Header() {
       : "??";
 
   const isAuthBusy = isLoggingIn || isInitializing;
+
+  const roleBadge = platformRole !== "free" ? ROLE_BADGE[platformRole] : null;
 
   // Split logo text: "PDFTools" → ["PDF", "Tools"], otherwise show plain
   const renderLogoText = () => {
@@ -95,10 +148,11 @@ export function Header() {
             All Tools
           </Link>
           <Link
-            to="/merge"
-            className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            to="/marketplace"
+            className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors flex items-center gap-1.5"
           >
-            Merge
+            <ShoppingBag className="w-3.5 h-3.5" />
+            Marketplace
           </Link>
           <Link
             to="/compress"
@@ -118,6 +172,14 @@ export function Header() {
           >
             Premium
           </Link>
+          {identity && (
+            <Link
+              to="/creator-dashboard"
+              className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            >
+              Creator
+            </Link>
+          )}
           {isAdmin && (
             <Link
               to="/admin"
@@ -131,6 +193,11 @@ export function Header() {
 
         {/* Auth + Mobile toggle */}
         <div className="flex items-center gap-2">
+          {/* Notification Bell (desktop) */}
+          <div className="hidden md:flex">
+            <NotificationBell />
+          </div>
+
           {/* Auth section */}
           {isAuthBusy ? (
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground font-ui px-2">
@@ -159,6 +226,17 @@ export function Header() {
                 <span className="text-xs text-muted-foreground font-ui max-w-[80px] truncate">
                   {displayLabel}
                 </span>
+                {roleBadge && (
+                  <Badge
+                    className="font-ui text-[10px] h-4 px-1 border-0"
+                    style={{
+                      backgroundColor: roleBadge.bg,
+                      color: roleBadge.color,
+                    }}
+                  >
+                    {roleBadge.label}
+                  </Badge>
+                )}
               </Link>
               <Button
                 variant="ghost"
@@ -213,6 +291,7 @@ export function Header() {
             <nav className="container py-4 flex flex-col gap-1 font-ui text-sm">
               {[
                 ["All Tools", "/"],
+                ["Marketplace", "/marketplace"],
                 ["Merge PDF", "/merge"],
                 ["Split PDF", "/split"],
                 ["Compress PDF", "/compress"],
@@ -227,6 +306,8 @@ export function Header() {
                 ["Unlock PDF", "/unlock"],
                 ["History", "/history"],
                 ["Premium", "/premium"],
+                ...(identity ? [["Notifications", "/notifications"]] : []),
+                ...(identity ? [["Creator", "/creator-dashboard"]] : []),
                 ...(identity ? [["Profile", "/profile"]] : []),
                 ...(isAdmin ? [["Admin", "/admin"]] : []),
               ].map(([label, path]) => (
@@ -236,11 +317,17 @@ export function Header() {
                   className={`px-3 py-2 rounded-md transition-colors flex items-center gap-2 ${
                     label === "Admin"
                       ? "text-primary hover:bg-primary/10 font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      : label === "Marketplace"
+                        ? "text-foreground hover:bg-accent font-medium"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
                   }`}
                   onClick={() => setMenuOpen(false)}
                 >
                   {label === "Admin" && <Settings className="w-4 h-4" />}
+                  {label === "Marketplace" && (
+                    <ShoppingBag className="w-4 h-4" />
+                  )}
+                  {label === "Notifications" && <Bell className="w-4 h-4" />}
                   {label}
                 </Link>
               ))}
@@ -273,6 +360,17 @@ export function Header() {
                       <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                         {displayLabel}
                       </span>
+                      {roleBadge && (
+                        <Badge
+                          className="font-ui text-[10px] h-4 px-1 border-0"
+                          style={{
+                            backgroundColor: roleBadge.bg,
+                            color: roleBadge.color,
+                          }}
+                        >
+                          {roleBadge.label}
+                        </Badge>
+                      )}
                     </Link>
                     <button
                       type="button"
