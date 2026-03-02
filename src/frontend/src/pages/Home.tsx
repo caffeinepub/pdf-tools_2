@@ -1606,12 +1606,12 @@ function ToolCard({ tool, usageCount }: { tool: Tool; usageCount?: number }) {
   return (
     <motion.div
       whileHover={{ y: -4, scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.97 }}
       transition={{ duration: 0.18 }}
     >
       <Link
         to={tool.path}
-        className="group block bg-card border border-border rounded-xl p-5 tool-card-shadow transition-all duration-200 hover:border-primary/30 relative overflow-hidden"
+        className="group block bg-card border border-border rounded-xl tool-card-shadow transition-all duration-200 hover:border-primary/30 relative overflow-hidden"
       >
         {/* Subtle top gradient on hover */}
         <div
@@ -1621,7 +1621,32 @@ function ToolCard({ tool, usageCount }: { tool: Tool; usageCount?: number }) {
           }}
         />
 
-        <div className="flex items-start gap-4">
+        {/* ── Mobile compact card (3-col grid) ── */}
+        <div className="sm:hidden flex flex-col items-center justify-center gap-1.5 p-3 min-h-[88px]">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: tool.bgColor }}
+          >
+            {tool.svgIcon}
+          </div>
+          <p className="text-[11px] font-ui font-medium text-foreground text-center leading-tight line-clamp-2 px-0.5">
+            {tool.name}
+          </p>
+          {tool.comingSoon && (
+            <span
+              className="text-[9px] font-ui font-medium px-1 py-0.5 rounded"
+              style={{
+                backgroundColor: `${tool.color}15`,
+                color: tool.color,
+              }}
+            >
+              Plus
+            </span>
+          )}
+        </div>
+
+        {/* ── Desktop / sm+ full card ── */}
+        <div className="hidden sm:flex items-start gap-4 p-5">
           <div
             className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
             style={{ backgroundColor: tool.bgColor }}
@@ -2445,7 +2470,7 @@ export function Home() {
                   <span className="w-1 h-5 rounded-full bg-primary inline-block" />
                   {category.label}
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                   {visibleTools.map((tool) => (
                     <ToolCard
                       key={tool.path}
@@ -2560,17 +2585,17 @@ export function Home() {
                 </Button>
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
               {IMAGE_TOOLS.map((tool) => (
                 <motion.div
                   key={tool.path}
                   whileHover={{ y: -4, scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileTap={{ scale: 0.97 }}
                   transition={{ duration: 0.18 }}
                 >
                   <Link
                     to={tool.path}
-                    className="group block bg-card border border-border rounded-xl p-5 tool-card-shadow transition-all duration-200 hover:border-primary/30 relative overflow-hidden"
+                    className="group block bg-card border border-border rounded-xl tool-card-shadow transition-all duration-200 hover:border-primary/30 relative overflow-hidden"
                   >
                     <div
                       className="absolute inset-x-0 top-0 h-1 rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -2578,7 +2603,20 @@ export function Home() {
                         background: `linear-gradient(90deg, ${tool.color}88, ${tool.color})`,
                       }}
                     />
-                    <div className="flex items-start gap-4">
+                    {/* Mobile compact (sm hidden) */}
+                    <div className="sm:hidden flex flex-col items-center justify-center gap-1.5 p-3 min-h-[88px]">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: tool.bgColor }}
+                      >
+                        {tool.svgIcon}
+                      </div>
+                      <p className="text-[11px] font-ui font-medium text-foreground text-center leading-tight line-clamp-2 px-0.5">
+                        {tool.name}
+                      </p>
+                    </div>
+                    {/* Desktop full card */}
+                    <div className="hidden sm:flex items-start gap-4 p-5">
                       <div
                         className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
                         style={{ backgroundColor: tool.bgColor }}

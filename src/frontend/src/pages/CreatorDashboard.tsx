@@ -20,9 +20,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { useActor } from "@/hooks/useActor";
 import { useInternetIdentity } from "@/hooks/useInternetIdentity";
-import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BarChart3,
@@ -113,15 +111,76 @@ const EMPTY_PRODUCT = {
   paymentLink: "",
 };
 
+// Serialise/deserialise products (BigInt values are stored as strings in JSON)
+function serializeProducts(products: Product[]): string {
+  return JSON.stringify(
+    products.map((p) => ({
+      ...p,
+      id: p.id.toString(),
+      price: p.price.toString(),
+      downloadCount: p.downloadCount.toString(),
+      createdAt: p.createdAt.toString(),
+    })),
+  );
+}
+
+function deserializeProducts(raw: string): Product[] {
+  try {
+    const arr = JSON.parse(raw) as Array<Record<string, unknown>>;
+    return arr.map((p) => ({
+      id: BigInt(p.id as string),
+      title: p.title as string,
+      description: p.description as string,
+      category: p.category as string,
+      price: BigInt(p.price as string),
+      isFree: p.isFree as boolean,
+      tags: p.tags as string[],
+      fileUrl: p.fileUrl as string,
+      paymentLink: p.paymentLink as string,
+      creatorPrincipal: p.creatorPrincipal as string,
+      downloadCount: BigInt(p.downloadCount as string),
+      createdAt: BigInt(p.createdAt as string),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function serializeProfile(profile: CreatorProfile): string {
+  return JSON.stringify({
+    ...profile,
+    createdAt: profile.createdAt.toString(),
+  });
+}
+
+function deserializeProfile(raw: string): CreatorProfile {
+  try {
+    const p = JSON.parse(raw) as Record<string, unknown>;
+    return {
+      displayName: (p.displayName as string) || "",
+      bio: (p.bio as string) || "",
+      category: (p.category as string) || "Technology",
+      profileType: (p.profileType as string) || "Project Seller",
+      socialLinks: (p.socialLinks as string[]) || [],
+      githubUrl: (p.githubUrl as string) || "",
+      contactEmail: (p.contactEmail as string) || "",
+      websiteUrl: (p.websiteUrl as string) || "",
+      profilePicUrl: (p.profilePicUrl as string) || "",
+      createdAt: BigInt((p.createdAt as string) || "0"),
+    };
+  } catch {
+    return { ...EMPTY_PROFILE };
+  }
+}
+
 export function CreatorDashboard() {
-  const { actor, isFetching } = useActor();
   const { identity, login } = useInternetIdentity();
   const [isCreator, setIsCreator] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<CreatorProfile>(EMPTY_PROFILE);
   const [products, setProducts] = useState<Product[]>([]);
-  const [tips, setTips] = useState<Tip[]>([]);
-  const [followers, setFollowers] = useState(0);
+  const [tips] = useState<Tip[]>([]);
+  const [followers] = useState(0);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [newProduct, setNewProduct] = useState({ ...EMPTY_PRODUCT });
   const [isAddingProduct, setIsAddingProduct] = useState(false);
@@ -130,147 +189,114 @@ export function CreatorDashboard() {
   const principalId = identity?.getPrincipal().toString();
 
   useEffect(() => {
-    async function load() {
-      if (!actor || isFetching || !identity) return;
-      setIsLoading(true);
-      try {
-        const role =
-          typeof (actor as any).getPlatformRole === "function"
-            ? ((await (actor as any).getPlatformRole()) as string)
-            : "free";
-        setPlatformRole(role || "free");
+    if (!identity) {
+      setIsLoading(false);
+      return;
+    }
+    const pid = identity.getPrincipal().toString();
 
-        const creatorData =
-          typeof (actor as any).getCreatorProfile === "function"
-            ? await (actor as any).getCreatorProfile(
-                identity.getPrincipal().toString(),
-              )
-            : null;
+    // Load platform role
+    const storedRole = localStorage.getItem(`platform_role_${pid}`) ?? "free";
+    setPlatformRole(storedRole);
 
-        if (creatorData) {
-          setIsCreator(true);
-          setProfile({ ...EMPTY_PROFILE, ...creatorData });
+    // Check creator role
+    const creatorRole = localStorage.getItem(`creator_role_${pid}`);
+    const creatorActive = creatorRole === "creator";
+    setIsCreator(creatorActive);
 
-          const [prods, tipsData, followerList] = await Promise.all([
-            typeof (actor as any).getProductsByCreator === "function"
-              ? (actor as any).getProductsByCreator(
-                  identity.getPrincipal().toString(),
-                )
-              : Promise.resolve([]),
-            typeof (actor as any).getTipsReceived === "function"
-              ? (actor as any).getTipsReceived(
-                  identity.getPrincipal().toString(),
-                )
-              : Promise.resolve([]),
-            typeof (actor as any).getFollowers === "function"
-              ? (actor as any).getFollowers(identity.getPrincipal().toString())
-              : Promise.resolve([]),
-          ]);
+    if (creatorActive) {
+      // Load profile
+      const rawProfile = localStorage.getItem(`creator_profile_${pid}`);
+      if (rawProfile) {
+        setProfile(deserializeProfile(rawProfile));
+      }
 
-          setProducts(prods || []);
-          setTips(tipsData || []);
-          setFollowers((followerList || []).length);
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setIsLoading(false);
+      // Load products
+      const rawProducts = localStorage.getItem(`creator_products_${pid}`);
+      if (rawProducts) {
+        setProducts(deserializeProducts(rawProducts));
       }
     }
-    load();
-  }, [actor, isFetching, identity]);
 
-  const handleClaimCreator = async () => {
-    if (!actor || !identity) return;
-    try {
-      if (typeof (actor as any).claimCreatorRole === "function") {
-        await (actor as any).claimCreatorRole();
-      }
-      setIsCreator(true);
-      toast.success("Welcome! You're now a creator.");
-    } catch {
-      toast.error("Failed to claim creator role");
-    }
+    setIsLoading(false);
+  }, [identity]);
+
+  const handleClaimCreator = () => {
+    if (!identity) return;
+    const pid = identity.getPrincipal().toString();
+    localStorage.setItem(`creator_role_${pid}`, "creator");
+    localStorage.setItem(`platform_role_${pid}`, "creator");
+    setPlatformRole("creator");
+    setIsCreator(true);
+    toast.success("Welcome! You're now a creator.");
   };
 
-  const handleSaveProfile = async () => {
-    if (!actor || !identity) return;
+  const handleSaveProfile = () => {
+    if (!identity) return;
     setIsSavingProfile(true);
-    try {
-      if (typeof (actor as any).saveCreatorProfile === "function") {
-        await (actor as any).saveCreatorProfile({
-          displayName: profile.displayName,
-          bio: profile.bio,
-          category: profile.category,
-          profileType: profile.profileType,
-          socialLinks: profile.socialLinks,
-          githubUrl: profile.githubUrl,
-          contactEmail: profile.contactEmail,
-          websiteUrl: profile.websiteUrl,
-          profilePicUrl: profile.profilePicUrl,
-          createdAt: profile.createdAt || BigInt(Date.now()),
-        });
-      }
-      toast.success("Profile saved!");
-    } catch {
-      toast.error("Failed to save profile");
-    } finally {
+    const pid = identity.getPrincipal().toString();
+    const toSave: CreatorProfile = {
+      ...profile,
+      createdAt: profile.createdAt || BigInt(Date.now()),
+    };
+    localStorage.setItem(`creator_profile_${pid}`, serializeProfile(toSave));
+    setProfile(toSave);
+    setTimeout(() => {
       setIsSavingProfile(false);
-    }
+      toast.success("Profile saved!");
+    }, 400);
   };
 
-  const handleAddProduct = async () => {
-    if (!actor || !identity || !newProduct.title.trim()) return;
+  const handleAddProduct = () => {
+    if (!identity || !newProduct.title.trim()) return;
     setIsAddingProduct(true);
-    try {
-      const price = newProduct.isFree
-        ? BigInt(0)
-        : BigInt(Math.round(Number.parseFloat(newProduct.price || "0") * 100));
-      const tags = newProduct.tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
+    const pid = identity.getPrincipal().toString();
+    const price = newProduct.isFree
+      ? BigInt(0)
+      : BigInt(Math.round(Number.parseFloat(newProduct.price || "0") * 100));
+    const tags = newProduct.tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
 
-      if (typeof (actor as any).createProduct === "function") {
-        await (actor as any).createProduct(
-          newProduct.title.trim(),
-          newProduct.description.trim(),
-          newProduct.category,
-          price,
-          newProduct.isFree,
-          tags,
-          newProduct.fileUrl.trim(),
-          newProduct.paymentLink.trim(),
-        );
-        toast.success("Product created!");
-        setNewProduct({ ...EMPTY_PRODUCT });
+    const product: Product = {
+      id: BigInt(Date.now()),
+      title: newProduct.title.trim(),
+      description: newProduct.description.trim(),
+      category: newProduct.category,
+      price,
+      isFree: newProduct.isFree,
+      tags,
+      fileUrl: newProduct.fileUrl.trim(),
+      paymentLink: newProduct.paymentLink.trim(),
+      creatorPrincipal: pid,
+      downloadCount: BigInt(0),
+      createdAt: BigInt(Date.now()),
+    };
 
-        // Refresh products
-        if (typeof (actor as any).getProductsByCreator === "function") {
-          const prods = await (actor as any).getProductsByCreator(
-            identity.getPrincipal().toString(),
-          );
-          setProducts(prods || []);
-        }
-      }
-    } catch {
-      toast.error("Failed to create product");
-    } finally {
+    const updatedProducts = [...products, product];
+    setProducts(updatedProducts);
+    localStorage.setItem(
+      `creator_products_${pid}`,
+      serializeProducts(updatedProducts),
+    );
+    setNewProduct({ ...EMPTY_PRODUCT });
+    setTimeout(() => {
       setIsAddingProduct(false);
-    }
+      toast.success("Product created!");
+    }, 300);
   };
 
-  const handleDeleteProduct = async (id: bigint) => {
-    if (!actor) return;
-    try {
-      if (typeof (actor as any).deleteProduct === "function") {
-        await (actor as any).deleteProduct(id);
-        setProducts((prev) => prev.filter((p) => p.id !== id));
-        toast.success("Product deleted");
-      }
-    } catch {
-      toast.error("Failed to delete product");
-    }
+  const handleDeleteProduct = (id: bigint) => {
+    if (!identity) return;
+    const pid = identity.getPrincipal().toString();
+    const updatedProducts = products.filter((p) => p.id !== id);
+    setProducts(updatedProducts);
+    localStorage.setItem(
+      `creator_products_${pid}`,
+      serializeProducts(updatedProducts),
+    );
+    toast.success("Product deleted");
   };
 
   const totalDownloads = products.reduce(

@@ -1,12 +1,17 @@
 import { Footer } from "@/components/Footer";
 import { GeminiChat } from "@/components/GeminiChat";
 import { Header } from "@/components/Header";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { MobileCameraScanner } from "@/components/MobileCameraScanner";
+import { MobileSidebar } from "@/components/MobileSidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminSettingsProvider } from "@/contexts/AdminSettingsContext";
 import { PlatformRoleProvider } from "@/contexts/PlatformRoleContext";
+import { AboutPage } from "@/pages/AboutPage";
 import { AdminPage } from "@/pages/AdminPage";
 import { ComparePDF } from "@/pages/ComparePDF";
 import { CompressPDF } from "@/pages/CompressPDF";
+import { ContactPage } from "@/pages/ContactPage";
 import { CreatorDashboard } from "@/pages/CreatorDashboard";
 import { CreatorProfile } from "@/pages/CreatorProfile";
 import { CropPDF } from "@/pages/CropPDF";
@@ -41,6 +46,7 @@ import { PDFToWord } from "@/pages/PDFToWord";
 import { PageNumbers } from "@/pages/PageNumbers";
 import { PowerPointToPDF } from "@/pages/PowerPointToPDF";
 import { PremiumPage } from "@/pages/PremiumPage";
+import { PrivacyPage } from "@/pages/PrivacyPage";
 import { ProductDetail } from "@/pages/ProductDetail";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { ProtectPDF } from "@/pages/ProtectPDF";
@@ -53,6 +59,7 @@ import { ScanToPDF } from "@/pages/ScanToPDF";
 import { SignPDF } from "@/pages/SignPDF";
 import { SplitPDF } from "@/pages/SplitPDF";
 import { SponsorDashboard } from "@/pages/SponsorDashboard";
+import { TermsPage } from "@/pages/TermsPage";
 import { TranslatePDF } from "@/pages/TranslatePDF";
 import { UnlockPDF } from "@/pages/UnlockPDF";
 import { UpgradePage } from "@/pages/UpgradePage";
@@ -67,25 +74,47 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
+import { useState } from "react";
 
 // Root layout
 const rootRoute = createRootRoute({
-  component: () => (
+  component: RootLayout,
+});
+
+function RootLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
+
+  return (
     <AdminSettingsProvider>
       <PlatformRoleProvider>
         <div className="min-h-screen flex flex-col bg-background">
-          <Header />
-          <div className="flex-1">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+          <div className="flex-1 pb-16 md:pb-0">
             <Outlet />
           </div>
           <Footer />
           <Toaster position="bottom-right" richColors />
           <GeminiChat />
+
+          {/* Mobile-only overlays */}
+          <MobileSidebar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+          <MobileCameraScanner
+            isOpen={scannerOpen}
+            onClose={() => setScannerOpen(false)}
+          />
+          <MobileBottomNav
+            onToolsClick={() => setSidebarOpen(true)}
+            onScannerClick={() => setScannerOpen(true)}
+          />
         </div>
       </PlatformRoleProvider>
     </AdminSettingsProvider>
-  ),
-});
+  );
+}
 
 // Routes
 const indexRoute = createRoute({
@@ -375,6 +404,28 @@ const notificationsRoute = createRoute({
   component: NotificationsPage,
 });
 
+// Company / info routes
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/about",
+  component: AboutPage,
+});
+const contactRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/contact",
+  component: ContactPage,
+});
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/privacy",
+  component: PrivacyPage,
+});
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/terms",
+  component: TermsPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   mergeRoute,
@@ -435,6 +486,11 @@ const routeTree = rootRoute.addChildren([
   creatorDashboardRoute,
   sponsorDashboardRoute,
   notificationsRoute,
+  // Company / info
+  aboutRoute,
+  contactRoute,
+  privacyRoute,
+  termsRoute,
 ]);
 
 const router = createRouter({ routeTree });
