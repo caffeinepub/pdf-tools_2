@@ -1527,7 +1527,434 @@ const IMAGE_CATEGORY: SidebarCategory = {
   ],
 };
 
-const ALL_CATEGORIES: SidebarCategory[] = [...PDF_CATEGORIES, IMAGE_CATEGORY];
+const AI_CATEGORY: SidebarCategory = {
+  label: "AI Tools",
+  tools: [
+    {
+      name: "PDF Summarizer",
+      path: "/ai-summarize",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>PDF Summarizer</title>
+          <circle
+            cx="11"
+            cy="11"
+            r="9"
+            fill="#7C3BE2"
+            opacity="0.15"
+            stroke="#7C3BE2"
+            strokeWidth="1.4"
+          />
+          <path
+            d="M7 8h8M7 11h6M7 14h4"
+            stroke="#7C3BE2"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          />
+        </svg>
+      ),
+      color: "#7C3BE2",
+      bgColor: "#F3EEFF",
+    },
+    {
+      name: "Ask PDF",
+      path: "/ai-ask-pdf",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>Ask PDF</title>
+          <rect
+            x="2"
+            y="3"
+            width="14"
+            height="12"
+            rx="2"
+            fill="#2563EB"
+            opacity="0.12"
+            stroke="#2563EB"
+            strokeWidth="1.4"
+          />
+          <path
+            d="M2 15l3-2"
+            stroke="#2563EB"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          />
+          <path
+            d="M7 8h6M7 11h4"
+            stroke="#2563EB"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            opacity="0.6"
+          />
+        </svg>
+      ),
+      color: "#2563EB",
+      bgColor: "#EFF6FF",
+    },
+    {
+      name: "Smart Translator",
+      path: "/ai-smart-translate",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>Smart Translator</title>
+          <circle
+            cx="11"
+            cy="11"
+            r="9"
+            fill="#0891B2"
+            opacity="0.12"
+            stroke="#0891B2"
+            strokeWidth="1.4"
+          />
+          <path
+            d="M2 11h18M11 2c-2 3-3.5 5.5-3.5 9s1.5 6 3.5 9"
+            stroke="#0891B2"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+          />
+        </svg>
+      ),
+      color: "#0891B2",
+      bgColor: "#ECFEFF",
+    },
+    {
+      name: "Entity Recognition",
+      path: "/ai-extract-entities",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>Entity Recognition</title>
+          <rect
+            x="3"
+            y="3"
+            width="7"
+            height="7"
+            rx="1.5"
+            fill="#059669"
+            opacity="0.2"
+            stroke="#059669"
+            strokeWidth="1.4"
+          />
+          <rect
+            x="12"
+            y="3"
+            width="7"
+            height="7"
+            rx="1.5"
+            fill="#059669"
+            opacity="0.12"
+            stroke="#059669"
+            strokeWidth="1.3"
+          />
+          <rect
+            x="3"
+            y="12"
+            width="7"
+            height="7"
+            rx="1.5"
+            fill="#059669"
+            opacity="0.12"
+            stroke="#059669"
+            strokeWidth="1.3"
+          />
+          <rect
+            x="12"
+            y="12"
+            width="7"
+            height="7"
+            rx="1.5"
+            fill="#059669"
+            opacity="0.08"
+            stroke="#059669"
+            strokeWidth="1.2"
+          />
+        </svg>
+      ),
+      color: "#059669",
+      bgColor: "#ECFDF5",
+    },
+    {
+      name: "Table Extractor",
+      path: "/ai-table-extractor",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>Table Extractor</title>
+          <rect
+            x="2"
+            y="3"
+            width="18"
+            height="16"
+            rx="2"
+            fill="#D97706"
+            opacity="0.1"
+            stroke="#D97706"
+            strokeWidth="1.4"
+          />
+          <path
+            d="M2 8h18M2 13h18M8 8v11M14 8v11"
+            stroke="#D97706"
+            strokeWidth="1.1"
+            strokeLinecap="round"
+          />
+        </svg>
+      ),
+      color: "#D97706",
+      bgColor: "#FFFBEB",
+    },
+    {
+      name: "AI Annotate",
+      path: "/ai-annotate",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>AI Annotate</title>
+          <path
+            d="M4 3h10l5 5v11a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z"
+            fill="#7C3AED"
+            opacity="0.12"
+            stroke="#7C3AED"
+            strokeWidth="1.4"
+          />
+          <path
+            d="M13 10l-4.5 4.5L6.5 16l1.5-2L12.5 9l.5 1z"
+            fill="#7C3AED"
+            opacity="0.3"
+            stroke="#7C3AED"
+            strokeWidth="1.2"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+      color: "#7C3AED",
+      bgColor: "#F5F3FF",
+    },
+    {
+      name: "AI Rewriter",
+      path: "/ai-rewrite",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>AI Rewriter</title>
+          <path
+            d="M5 5c3-2 8-2 11 1s2 8-1 11"
+            stroke="#E11D48"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M17 14v4M15 16h4"
+            stroke="#E11D48"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          />
+          <path
+            d="M4 8l-1 4 4-1"
+            stroke="#E11D48"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+      color: "#E11D48",
+      bgColor: "#FFF1F2",
+    },
+  ],
+};
+
+const CONVERSION_CATEGORY: SidebarCategory = {
+  label: "Document Conversion",
+  tools: [
+    {
+      name: "PDF to HTML",
+      path: "/pdf-to-html",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>PDF to HTML</title>
+          <rect
+            x="2"
+            y="3"
+            width="9"
+            height="12"
+            rx="1"
+            fill="#F59E0B"
+            opacity="0.15"
+            stroke="#F59E0B"
+            strokeWidth="1.4"
+          />
+          <path
+            d="M13.5 9L11 11.5 13.5 14M17.5 9L20 11.5 17.5 14"
+            stroke="#F59E0B"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+      color: "#F59E0B",
+      bgColor: "#FFFBEB",
+    },
+    {
+      name: "PDF to Markdown",
+      path: "/pdf-to-markdown",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>PDF to Markdown</title>
+          <rect
+            x="2"
+            y="3"
+            width="9"
+            height="12"
+            rx="1"
+            fill="#6366F1"
+            opacity="0.15"
+            stroke="#6366F1"
+            strokeWidth="1.4"
+          />
+          <text
+            x="13"
+            y="15"
+            fontSize="8"
+            fill="#6366F1"
+            fontWeight="bold"
+            fontFamily="monospace"
+          >
+            MD
+          </text>
+        </svg>
+      ),
+      color: "#6366F1",
+      bgColor: "#EEF2FF",
+    },
+    {
+      name: "Markdown to PDF",
+      path: "/markdown-to-pdf",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>Markdown to PDF</title>
+          <text
+            x="2"
+            y="13"
+            fontSize="7"
+            fill="#10B981"
+            fontWeight="bold"
+            fontFamily="monospace"
+          >
+            MD
+          </text>
+          <path
+            d="M12 5v10M9 12l3 3 3-3"
+            stroke="#10B981"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+      color: "#10B981",
+      bgColor: "#ECFDF5",
+    },
+    {
+      name: "PDF to RTF",
+      path: "/pdf-to-rtf",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>PDF to RTF</title>
+          <rect
+            x="2"
+            y="3"
+            width="9"
+            height="12"
+            rx="1"
+            fill="#8B5CF6"
+            opacity="0.15"
+            stroke="#8B5CF6"
+            strokeWidth="1.4"
+          />
+          <text
+            x="13"
+            y="15"
+            fontSize="6"
+            fill="#8B5CF6"
+            fontWeight="bold"
+            fontFamily="monospace"
+          >
+            RTF
+          </text>
+        </svg>
+      ),
+      color: "#8B5CF6",
+      bgColor: "#F5F3FF",
+    },
+    {
+      name: "RTF to PDF",
+      path: "/rtf-to-pdf",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>RTF to PDF</title>
+          <text
+            x="1"
+            y="13"
+            fontSize="6"
+            fill="#EC4899"
+            fontWeight="bold"
+            fontFamily="monospace"
+          >
+            RTF
+          </text>
+          <path
+            d="M12 5v10M9 12l3 3 3-3"
+            stroke="#EC4899"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+      color: "#EC4899",
+      bgColor: "#FDF2F8",
+    },
+  ],
+};
+
+const UTILITY_CATEGORY: SidebarCategory = {
+  label: "Utility Tools",
+  tools: [
+    {
+      name: "Word Counter",
+      path: "/word-counter",
+      svgIcon: (
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+          <title>Word Counter</title>
+          <rect
+            x="2"
+            y="3"
+            width="18"
+            height="16"
+            rx="2"
+            fill="#0EA5E9"
+            opacity="0.1"
+            stroke="#0EA5E9"
+            strokeWidth="1.4"
+          />
+          <path
+            d="M5 7h5M5 10h8M5 13h6M5 16h4"
+            stroke="#0EA5E9"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+          />
+        </svg>
+      ),
+      color: "#0EA5E9",
+      bgColor: "#F0F9FF",
+    },
+  ],
+};
+
+const ALL_CATEGORIES: SidebarCategory[] = [
+  ...PDF_CATEGORIES,
+  IMAGE_CATEGORY,
+  AI_CATEGORY,
+  CONVERSION_CATEGORY,
+  UTILITY_CATEGORY,
+];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 

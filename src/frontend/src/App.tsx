@@ -7,8 +7,18 @@ import { MobileSidebar } from "@/components/MobileSidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminSettingsProvider } from "@/contexts/AdminSettingsContext";
 import { PlatformRoleProvider } from "@/contexts/PlatformRoleContext";
+import { useRoleRedirect } from "@/hooks/useRoleRedirect";
+// AI Tools
+import { AIAnnotate } from "@/pages/AIAnnotate";
+import { AIExtractEntities } from "@/pages/AIExtractEntities";
+import { AIRewrite } from "@/pages/AIRewrite";
+import { AISmartTranslator } from "@/pages/AISmartTranslator";
+import { AISummarizePDF } from "@/pages/AISummarizePDF";
+import { AITableExtractor } from "@/pages/AITableExtractor";
 import { AboutPage } from "@/pages/AboutPage";
 import { AdminPage } from "@/pages/AdminPage";
+import { AdvancedPDFEditor } from "@/pages/AdvancedPDFEditor";
+import { AskPDF } from "@/pages/AskPDF";
 import { ComparePDF } from "@/pages/ComparePDF";
 import { CompressPDF } from "@/pages/CompressPDF";
 import { ContactPage } from "@/pages/ContactPage";
@@ -32,6 +42,8 @@ import { ImgRotate } from "@/pages/ImgRotate";
 import { ImgToPDF } from "@/pages/ImgToPDF";
 import { ImgWatermark } from "@/pages/ImgWatermark";
 import { JPGToPDF } from "@/pages/JPGToPDF";
+// Document Conversion
+import { MarkdownToPDF } from "@/pages/MarkdownToPDF";
 import { Marketplace } from "@/pages/Marketplace";
 import { MergePDF } from "@/pages/MergePDF";
 import { NotificationsPage } from "@/pages/NotificationsPage";
@@ -39,9 +51,12 @@ import { OCRPDF } from "@/pages/OCRPDF";
 import { OptimizePDF } from "@/pages/OptimizePDF";
 import { OrganizePDF } from "@/pages/OrganizePDF";
 import { PDFToExcel } from "@/pages/PDFToExcel";
+import { PDFToHTML } from "@/pages/PDFToHTML";
 import { PDFToJPG } from "@/pages/PDFToJPG";
+import { PDFToMarkdown } from "@/pages/PDFToMarkdown";
 import { PDFToPDFA } from "@/pages/PDFToPDFA";
 import { PDFToPowerPoint } from "@/pages/PDFToPowerPoint";
+import { PDFToRTF } from "@/pages/PDFToRTF";
 import { PDFToWord } from "@/pages/PDFToWord";
 import { PageNumbers } from "@/pages/PageNumbers";
 import { PowerPointToPDF } from "@/pages/PowerPointToPDF";
@@ -51,6 +66,7 @@ import { ProductDetail } from "@/pages/ProductDetail";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { ProtectPDF } from "@/pages/ProtectPDF";
 import { PublicProfilePage } from "@/pages/PublicProfilePage";
+import { RTFToPDF } from "@/pages/RTFToPDF";
 import { RedactPDF } from "@/pages/RedactPDF";
 import { RemovePages } from "@/pages/RemovePages";
 import { RepairPDF } from "@/pages/RepairPDF";
@@ -66,6 +82,8 @@ import { UnlockPDF } from "@/pages/UnlockPDF";
 import { UpgradePage } from "@/pages/UpgradePage";
 import { UserDashboard } from "@/pages/UserDashboard";
 import { WatermarkPDF } from "@/pages/WatermarkPDF";
+// Utility Tools
+import { WordCounter } from "@/pages/WordCounter";
 import { WordToPDF } from "@/pages/WordToPDF";
 import { WorkflowsPage } from "@/pages/WorkflowsPage";
 import {
@@ -82,36 +100,46 @@ const rootRoute = createRootRoute({
   component: RootLayout,
 });
 
-function RootLayout() {
+/** Inner component so useRoleRedirect can access the TanStack Router context */
+function RootLayoutInner() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
 
+  // Role-based redirect on login (must be inside RouterProvider)
+  useRoleRedirect();
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header onMenuClick={() => setSidebarOpen(true)} />
+      <div className="flex-1 pb-16 md:pb-0">
+        <Outlet />
+      </div>
+      <Footer />
+      <Toaster position="bottom-right" richColors />
+      <GeminiChat />
+
+      {/* Mobile-only overlays */}
+      <MobileSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <MobileCameraScanner
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+      />
+      <MobileBottomNav
+        onToolsClick={() => setSidebarOpen(true)}
+        onScannerClick={() => setScannerOpen(true)}
+      />
+    </div>
+  );
+}
+
+function RootLayout() {
   return (
     <AdminSettingsProvider>
       <PlatformRoleProvider>
-        <div className="min-h-screen flex flex-col bg-background">
-          <Header onMenuClick={() => setSidebarOpen(true)} />
-          <div className="flex-1 pb-16 md:pb-0">
-            <Outlet />
-          </div>
-          <Footer />
-          <Toaster position="bottom-right" richColors />
-          <GeminiChat />
-
-          {/* Mobile-only overlays */}
-          <MobileSidebar
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-          />
-          <MobileCameraScanner
-            isOpen={scannerOpen}
-            onClose={() => setScannerOpen(false)}
-          />
-          <MobileBottomNav
-            onToolsClick={() => setSidebarOpen(true)}
-            onScannerClick={() => setScannerOpen(true)}
-          />
-        </div>
+        <RootLayoutInner />
       </PlatformRoleProvider>
     </AdminSettingsProvider>
   );
@@ -259,6 +287,11 @@ const editPdfRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/edit",
   component: EditPDF,
+});
+const advancedEditPdfRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/edit-advanced",
+  component: AdvancedPDFEditor,
 });
 const cropPdfRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -433,6 +466,75 @@ const termsRoute = createRoute({
   component: TermsPage,
 });
 
+// AI Tool routes
+const aiSummarizeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/ai-summarize",
+  component: AISummarizePDF,
+});
+const aiAskPdfRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/ai-ask-pdf",
+  component: AskPDF,
+});
+const aiSmartTranslateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/ai-smart-translate",
+  component: AISmartTranslator,
+});
+const aiExtractEntitiesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/ai-extract-entities",
+  component: AIExtractEntities,
+});
+const aiTableExtractorRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/ai-table-extractor",
+  component: AITableExtractor,
+});
+const aiAnnotateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/ai-annotate",
+  component: AIAnnotate,
+});
+const aiRewriteRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/ai-rewrite",
+  component: AIRewrite,
+});
+// Document Conversion routes
+const pdfToHtmlRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pdf-to-html",
+  component: PDFToHTML,
+});
+const pdfToMarkdownRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pdf-to-markdown",
+  component: PDFToMarkdown,
+});
+const markdownToPdfRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/markdown-to-pdf",
+  component: MarkdownToPDF,
+});
+const pdfToRtfRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pdf-to-rtf",
+  component: PDFToRTF,
+});
+const rtfToPdfRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/rtf-to-pdf",
+  component: RTFToPDF,
+});
+// Utility routes
+const wordCounterRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/word-counter",
+  component: WordCounter,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   mergeRoute,
@@ -463,6 +565,7 @@ const routeTree = rootRoute.addChildren([
   pdfToExcelRoute,
   pdfToPdfaRoute,
   editPdfRoute,
+  advancedEditPdfRoute,
   cropPdfRoute,
   signPdfRoute,
   redactPdfRoute,
@@ -499,6 +602,22 @@ const routeTree = rootRoute.addChildren([
   privacyRoute,
   termsRoute,
   superAdminRoute,
+  // AI Tools
+  aiSummarizeRoute,
+  aiAskPdfRoute,
+  aiSmartTranslateRoute,
+  aiExtractEntitiesRoute,
+  aiTableExtractorRoute,
+  aiAnnotateRoute,
+  aiRewriteRoute,
+  // Document Conversion
+  pdfToHtmlRoute,
+  pdfToMarkdownRoute,
+  markdownToPdfRoute,
+  pdfToRtfRoute,
+  rtfToPdfRoute,
+  // Utility
+  wordCounterRoute,
 ]);
 
 const router = createRouter({ routeTree });

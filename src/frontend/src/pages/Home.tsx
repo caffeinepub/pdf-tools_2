@@ -1035,6 +1035,55 @@ const CATEGORIES: Category[] = [
     label: "Edit PDF",
     tools: [
       {
+        name: "Advanced PDF Editor",
+        path: "/edit-advanced",
+        description: "Canva-style visual editing with drag & drop",
+        svgIcon: (
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <title>Advanced PDF Editor</title>
+            <rect
+              x="2"
+              y="2"
+              width="16"
+              height="16"
+              rx="2"
+              fill="#7C3AED"
+              opacity="0.15"
+              stroke="#7C3AED"
+              strokeWidth="1.4"
+            />
+            <rect
+              x="5"
+              y="5"
+              width="10"
+              height="7"
+              rx="1"
+              fill="#7C3AED"
+              opacity="0.2"
+              stroke="#7C3AED"
+              strokeWidth="1"
+            />
+            <path
+              d="M5 14h3M9 14h3M13 14h2"
+              stroke="#7C3AED"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              opacity="0.6"
+            />
+            <circle cx="14" cy="6" r="3" fill="#7C3AED" opacity="0.9" />
+            <path
+              d="M13 6l0.7 0.7L15.5 5"
+              stroke="white"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ),
+        color: "#7C3AED",
+        bgColor: "#F3EEFF",
+      },
+      {
         name: "Edit PDF",
         path: "/edit",
         description: "Add text annotations and overlays",
@@ -2828,6 +2877,684 @@ export function Home() {
                   </motion.div>
                 );
               })}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* AI Intelligence Tools Section */}
+      <section className="border-t border-border bg-gradient-to-br from-purple-50/40 via-background to-indigo-50/30">
+        <div className="container max-w-5xl py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+              <h2 className="font-display font-bold text-lg text-foreground flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-primary inline-block" />
+                AI Intelligence Tools
+              </h2>
+              <Link to="/ai-summarize">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-ui text-xs gap-1.5"
+                >
+                  Explore AI Tools
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+              {[
+                {
+                  name: "PDF Summarizer",
+                  desc: "AI-generated executive summaries",
+                  path: "/ai-summarize",
+                  color: "#7C3BE2",
+                  bgColor: "#F3EEFF",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>Summarize</title>
+                      <circle
+                        cx="11"
+                        cy="11"
+                        r="9"
+                        fill="#7C3BE2"
+                        opacity="0.15"
+                        stroke="#7C3BE2"
+                        strokeWidth="1.4"
+                      />
+                      <path
+                        d="M7 8h8M7 11h6M7 14h4"
+                        stroke="#7C3BE2"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M17 7l-1.5 2 1.5 2"
+                        stroke="#7C3BE2"
+                        strokeWidth="1.3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        opacity="0.5"
+                      />
+                    </svg>
+                  ),
+                },
+                {
+                  name: "Ask PDF",
+                  desc: "Chat-style Q&A over documents",
+                  path: "/ai-ask-pdf",
+                  color: "#2563EB",
+                  bgColor: "#EFF6FF",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>Ask PDF</title>
+                      <rect
+                        x="2"
+                        y="3"
+                        width="14"
+                        height="12"
+                        rx="2"
+                        fill="#2563EB"
+                        opacity="0.12"
+                        stroke="#2563EB"
+                        strokeWidth="1.4"
+                      />
+                      <path
+                        d="M2 15l3-2"
+                        stroke="#2563EB"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M7 8h6M7 11h4"
+                        stroke="#2563EB"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        opacity="0.6"
+                      />
+                      <circle
+                        cx="17"
+                        cy="16"
+                        r="4"
+                        fill="#2563EB"
+                        opacity="0.15"
+                        stroke="#2563EB"
+                        strokeWidth="1.3"
+                      />
+                      <path
+                        d="M15.5 16a1.5 1.5 0 113 0c0 .83-.67 1.5-1.5 1.5v.5"
+                        stroke="#2563EB"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  ),
+                },
+                {
+                  name: "Smart Translator",
+                  desc: "Multi-language PDF conversion",
+                  path: "/ai-smart-translate",
+                  color: "#0891B2",
+                  bgColor: "#ECFEFF",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>Translate</title>
+                      <circle
+                        cx="11"
+                        cy="11"
+                        r="9"
+                        fill="#0891B2"
+                        opacity="0.12"
+                        stroke="#0891B2"
+                        strokeWidth="1.4"
+                      />
+                      <path
+                        d="M2 11h18M11 2c-2 3-3.5 5.5-3.5 9s1.5 6 3.5 9M11 2c2 3 3.5 5.5 3.5 9s-1.5 6-3.5 9"
+                        stroke="#0891B2"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  ),
+                },
+                {
+                  name: "Entity Recognition",
+                  desc: "Auto text extraction & NER",
+                  path: "/ai-extract-entities",
+                  color: "#059669",
+                  bgColor: "#ECFDF5",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>Entity</title>
+                      <rect
+                        x="3"
+                        y="3"
+                        width="7"
+                        height="7"
+                        rx="1.5"
+                        fill="#059669"
+                        opacity="0.2"
+                        stroke="#059669"
+                        strokeWidth="1.4"
+                      />
+                      <rect
+                        x="12"
+                        y="3"
+                        width="7"
+                        height="7"
+                        rx="1.5"
+                        fill="#059669"
+                        opacity="0.12"
+                        stroke="#059669"
+                        strokeWidth="1.3"
+                      />
+                      <rect
+                        x="3"
+                        y="12"
+                        width="7"
+                        height="7"
+                        rx="1.5"
+                        fill="#059669"
+                        opacity="0.12"
+                        stroke="#059669"
+                        strokeWidth="1.3"
+                      />
+                      <rect
+                        x="12"
+                        y="12"
+                        width="7"
+                        height="7"
+                        rx="1.5"
+                        fill="#059669"
+                        opacity="0.08"
+                        stroke="#059669"
+                        strokeWidth="1.2"
+                      />
+                    </svg>
+                  ),
+                },
+                {
+                  name: "Table Extractor",
+                  desc: "Extract tables to CSV",
+                  path: "/ai-table-extractor",
+                  color: "#D97706",
+                  bgColor: "#FFFBEB",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>Table</title>
+                      <rect
+                        x="2"
+                        y="3"
+                        width="18"
+                        height="16"
+                        rx="2"
+                        fill="#D97706"
+                        opacity="0.1"
+                        stroke="#D97706"
+                        strokeWidth="1.4"
+                      />
+                      <path
+                        d="M2 8h18M2 13h18M8 8v11M14 8v11"
+                        stroke="#D97706"
+                        strokeWidth="1.1"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  ),
+                },
+                {
+                  name: "AI Annotate",
+                  desc: "Insights, suggestions & score",
+                  path: "/ai-annotate",
+                  color: "#7C3AED",
+                  bgColor: "#F5F3FF",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>Annotate</title>
+                      <path
+                        d="M4 3h10l5 5v11a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z"
+                        fill="#7C3AED"
+                        opacity="0.12"
+                        stroke="#7C3AED"
+                        strokeWidth="1.4"
+                      />
+                      <path
+                        d="M13 10l-4.5 4.5L6.5 16l1.5-2L12.5 9l.5 1z"
+                        fill="#7C3AED"
+                        opacity="0.3"
+                        stroke="#7C3AED"
+                        strokeWidth="1.2"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ),
+                },
+                {
+                  name: "AI Rewriter",
+                  desc: "Simplify, condense, or expand",
+                  path: "/ai-rewrite",
+                  color: "#E11D48",
+                  bgColor: "#FFF1F2",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>Rewrite</title>
+                      <path
+                        d="M5 5c3-2 8-2 11 1s2 8-1 11"
+                        stroke="#E11D48"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M17 14v4M15 16h4"
+                        stroke="#E11D48"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M4 8l-1 4 4-1"
+                        stroke="#E11D48"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ),
+                },
+              ].map((tool) => (
+                <motion.div
+                  key={tool.path}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <Link
+                    to={tool.path}
+                    className="group block bg-card border border-border rounded-xl tool-card-shadow transition-all duration-200 hover:border-primary/30 relative overflow-hidden"
+                  >
+                    <div
+                      className="absolute inset-x-0 top-0 h-1 rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{
+                        background: `linear-gradient(90deg, ${tool.color}88, ${tool.color})`,
+                      }}
+                    />
+                    <div className="sm:hidden flex flex-col items-center justify-center gap-1.5 p-3 min-h-[88px]">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: tool.bgColor }}
+                      >
+                        {tool.svgIcon}
+                      </div>
+                      <p className="text-[11px] font-ui font-medium text-foreground text-center leading-tight line-clamp-2 px-0.5">
+                        {tool.name}
+                      </p>
+                    </div>
+                    <div className="hidden sm:flex items-start gap-4 p-5">
+                      <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                        style={{ backgroundColor: tool.bgColor }}
+                      >
+                        {tool.svgIcon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-display font-semibold text-sm text-foreground mb-1">
+                          {tool.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {tool.desc}
+                        </p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0 mt-1" />
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Document Conversion Section */}
+      <section className="border-t border-border">
+        <div className="container max-w-5xl py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+              <h2 className="font-display font-bold text-lg text-foreground flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-primary inline-block" />
+                Document Conversion
+              </h2>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+              {[
+                {
+                  name: "PDF to HTML",
+                  desc: "Clean HTML with proper structure",
+                  path: "/pdf-to-html",
+                  color: "#F59E0B",
+                  bgColor: "#FFFBEB",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>PDF to HTML</title>
+                      <rect
+                        x="2"
+                        y="3"
+                        width="9"
+                        height="12"
+                        rx="1"
+                        fill="#F59E0B"
+                        opacity="0.15"
+                        stroke="#F59E0B"
+                        strokeWidth="1.4"
+                      />
+                      <path
+                        d="M13.5 9L11 11.5 13.5 14M17.5 9L20 11.5 17.5 14"
+                        stroke="#F59E0B"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ),
+                },
+                {
+                  name: "PDF to Markdown",
+                  desc: "Convert to .md with headings",
+                  path: "/pdf-to-markdown",
+                  color: "#6366F1",
+                  bgColor: "#EEF2FF",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>PDF to Markdown</title>
+                      <rect
+                        x="2"
+                        y="3"
+                        width="9"
+                        height="12"
+                        rx="1"
+                        fill="#6366F1"
+                        opacity="0.15"
+                        stroke="#6366F1"
+                        strokeWidth="1.4"
+                      />
+                      <text
+                        x="13"
+                        y="15"
+                        fontSize="9"
+                        fill="#6366F1"
+                        fontWeight="bold"
+                        fontFamily="monospace"
+                      >
+                        MD
+                      </text>
+                    </svg>
+                  ),
+                },
+                {
+                  name: "Markdown to PDF",
+                  desc: "Convert .md to clean PDF",
+                  path: "/markdown-to-pdf",
+                  color: "#10B981",
+                  bgColor: "#ECFDF5",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>Markdown to PDF</title>
+                      <text
+                        x="2"
+                        y="14"
+                        fontSize="9"
+                        fill="#10B981"
+                        fontWeight="bold"
+                        fontFamily="monospace"
+                      >
+                        MD
+                      </text>
+                      <path
+                        d="M12 5v10M9 12l3 3 3-3"
+                        stroke="#10B981"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ),
+                },
+                {
+                  name: "PDF to RTF",
+                  desc: "Rich Text Format output",
+                  path: "/pdf-to-rtf",
+                  color: "#8B5CF6",
+                  bgColor: "#F5F3FF",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>PDF to RTF</title>
+                      <rect
+                        x="2"
+                        y="3"
+                        width="9"
+                        height="12"
+                        rx="1"
+                        fill="#8B5CF6"
+                        opacity="0.15"
+                        stroke="#8B5CF6"
+                        strokeWidth="1.4"
+                      />
+                      <text
+                        x="13"
+                        y="15"
+                        fontSize="7"
+                        fill="#8B5CF6"
+                        fontWeight="bold"
+                        fontFamily="monospace"
+                      >
+                        RTF
+                      </text>
+                    </svg>
+                  ),
+                },
+                {
+                  name: "RTF to PDF",
+                  desc: "Convert RTF to PDF document",
+                  path: "/rtf-to-pdf",
+                  color: "#EC4899",
+                  bgColor: "#FDF2F8",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>RTF to PDF</title>
+                      <text
+                        x="1"
+                        y="14"
+                        fontSize="7"
+                        fill="#EC4899"
+                        fontWeight="bold"
+                        fontFamily="monospace"
+                      >
+                        RTF
+                      </text>
+                      <path
+                        d="M12 5v10M9 12l3 3 3-3"
+                        stroke="#EC4899"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ),
+                },
+              ].map((tool) => (
+                <motion.div
+                  key={tool.path}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <Link
+                    to={tool.path}
+                    className="group block bg-card border border-border rounded-xl tool-card-shadow transition-all duration-200 hover:border-primary/30 relative overflow-hidden"
+                  >
+                    <div
+                      className="absolute inset-x-0 top-0 h-1 rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{
+                        background: `linear-gradient(90deg, ${tool.color}88, ${tool.color})`,
+                      }}
+                    />
+                    <div className="sm:hidden flex flex-col items-center justify-center gap-1.5 p-3 min-h-[88px]">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: tool.bgColor }}
+                      >
+                        {tool.svgIcon}
+                      </div>
+                      <p className="text-[11px] font-ui font-medium text-foreground text-center leading-tight line-clamp-2 px-0.5">
+                        {tool.name}
+                      </p>
+                    </div>
+                    <div className="hidden sm:flex items-start gap-4 p-5">
+                      <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                        style={{ backgroundColor: tool.bgColor }}
+                      >
+                        {tool.svgIcon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-display font-semibold text-sm text-foreground mb-1">
+                          {tool.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {tool.desc}
+                        </p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0 mt-1" />
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Utility Tools Section */}
+      <section className="border-t border-border bg-muted/20">
+        <div className="container max-w-5xl py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+              <h2 className="font-display font-bold text-lg text-foreground flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-primary inline-block" />
+                Utility Tools
+              </h2>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+              {[
+                {
+                  name: "Word Counter",
+                  desc: "Words, chars, sentences & frequency",
+                  path: "/word-counter",
+                  color: "#0EA5E9",
+                  bgColor: "#F0F9FF",
+                  svgIcon: (
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <title>Word Counter</title>
+                      <rect
+                        x="2"
+                        y="3"
+                        width="18"
+                        height="16"
+                        rx="2"
+                        fill="#0EA5E9"
+                        opacity="0.1"
+                        stroke="#0EA5E9"
+                        strokeWidth="1.4"
+                      />
+                      <path
+                        d="M5 7h5M5 10h8M5 13h6M5 16h4"
+                        stroke="#0EA5E9"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                      />
+                      <rect
+                        x="14"
+                        y="11"
+                        width="6"
+                        height="6"
+                        rx="1"
+                        fill="#0EA5E9"
+                        opacity="0.2"
+                      />
+                      <text
+                        x="15"
+                        y="17"
+                        fontSize="5"
+                        fill="#0EA5E9"
+                        fontWeight="bold"
+                        fontFamily="monospace"
+                      >
+                        123
+                      </text>
+                    </svg>
+                  ),
+                },
+              ].map((tool) => (
+                <motion.div
+                  key={tool.path}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <Link
+                    to={tool.path}
+                    className="group block bg-card border border-border rounded-xl tool-card-shadow transition-all duration-200 hover:border-primary/30 relative overflow-hidden"
+                  >
+                    <div
+                      className="absolute inset-x-0 top-0 h-1 rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{
+                        background: `linear-gradient(90deg, ${tool.color}88, ${tool.color})`,
+                      }}
+                    />
+                    <div className="sm:hidden flex flex-col items-center justify-center gap-1.5 p-3 min-h-[88px]">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: tool.bgColor }}
+                      >
+                        {tool.svgIcon}
+                      </div>
+                      <p className="text-[11px] font-ui font-medium text-foreground text-center leading-tight line-clamp-2 px-0.5">
+                        {tool.name}
+                      </p>
+                    </div>
+                    <div className="hidden sm:flex items-start gap-4 p-5">
+                      <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                        style={{ backgroundColor: tool.bgColor }}
+                      >
+                        {tool.svgIcon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-display font-semibold text-sm text-foreground mb-1">
+                          {tool.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {tool.desc}
+                        </p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0 mt-1" />
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         </div>
